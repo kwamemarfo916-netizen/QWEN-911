@@ -14,12 +14,10 @@
         overflow-x: hidden;
     }
 
-    /* Neon glow effect */
     .neon {
         text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
     }
 
-    /* Top bar */
     header {
         background: black;
         padding: 15px;
@@ -43,7 +41,6 @@
         color: black;
     }
 
-    /* Slide menu */
     .sidebar {
         position: fixed;
         left: -220px;
@@ -74,7 +71,6 @@
         left: 0;
     }
 
-    /* Pages */
     .page {
         padding: 40px;
         text-align: center;
@@ -86,33 +82,17 @@
         to {opacity: 1;}
     }
 
-    /* Media cards */
     .media-card {
         border: 1px solid #00ffff;
-        margin: 15px auto;
+        margin: 20px auto;
         padding: 15px;
-        width: 250px;
+        width: 280px;
         transition: 0.3s;
     }
 
     .media-card:hover {
         box-shadow: 0 0 15px #00ffff;
         transform: scale(1.05);
-    }
-
-    .download-btn {
-        background: black;
-        border: 2px solid #00ffff;
-        color: #00ffff;
-        padding: 8px 12px;
-        cursor: pointer;
-        margin-top: 10px;
-        transition: 0.3s;
-    }
-
-    .download-btn:hover {
-        background: #00ffff;
-        color: black;
     }
 </style>
 </head>
@@ -132,29 +112,22 @@
 <!-- Home Page -->
 <div class="page" id="home">
     <h1 class="neon">Welcome to Marfo Media</h1>
-    <p>Your place to download media files.</p>
+    <p>Your place to watch and download media.</p>
 </div>
 
 <!-- Media Page -->
 <div class="page" id="media" style="display:none;">
-    <h1 class="neon">Media Downloads</h1>
+    <h1 class="neon">Media</h1>
 
-    <!-- Media Item 1 -->
-    <div class="media-card">
-        <h3>🎵 Song</h3>
-        <p>Sample audio file</p>
-        <a href="song.mp3" download>
-            <button class="download-btn">⬇ Get</button>
-        </a>
-    </div>
-
-    <!-- Media Item 2 -->
     <div class="media-card">
         <h3>🎬 Vid</h3>
-        <p>Sample video file</p>
-        <a href="video.mp4" download>
-            <button class="download-btn">⬇ Get</button>
-        </a>
+        <p>The CRUEL Physics behind Tsunamis!</p>
+
+        <iframe width="250" height="150"
+        src="https://www.youtube.com/embed/piH4O4doAMo"
+        frameborder="0"
+        allowfullscreen>
+        </iframe>
     </div>
 
 </div>
@@ -172,4 +145,4 @@ function showPage(pageId) {
 </script>
 
 </body>
-</html>
+    </html>
