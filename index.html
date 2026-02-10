@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MarfoMedia.com</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: black;
+        color: #00ffff;
+        overflow-x: hidden;
+    }
+
+    /* Neon glow effect */
+    .neon {
+        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+    }
+
+    /* Top bar */
+    header {
+        background: black;
+        padding: 15px;
+        border-bottom: 2px solid #00ffff;
+        display: flex;
+        align-items: center;
+    }
+
+    .menu-btn {
+        background: none;
+        border: 2px solid #00ffff;
+        color: #00ffff;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+    .menu-btn:hover {
+        background: #00ffff;
+        color: black;
+    }
+
+    /* Slide menu */
+    .sidebar {
+        position: fixed;
+        left: -220px;
+        top: 0;
+        width: 220px;
+        height: 100%;
+        background: black;
+        border-right: 2px solid #00ffff;
+        padding-top: 60px;
+        transition: 0.4s;
+    }
+
+    .sidebar a {
+        display: block;
+        padding: 15px;
+        color: #00ffff;
+        text-decoration: none;
+        border-bottom: 1px solid #00ffff33;
+        transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+        background: #00ffff;
+        color: black;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* Pages */
+    .page {
+        padding: 40px;
+        text-align: center;
+        animation: fadeIn 1s;
+    }
+
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+
+    /* Media cards */
+    .media-card {
+        border: 1px solid #00ffff;
+        margin: 15px auto;
+        padding: 15px;
+        width: 250px;
+        transition: 0.3s;
+    }
+
+    .media-card:hover {
+        box-shadow: 0 0 15px #00ffff;
+        transform: scale(1.05);
+    }
+
+    .download-btn {
+        background: black;
+        border: 2px solid #00ffff;
+        color: #00ffff;
+        padding: 8px 12px;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: 0.3s;
+    }
+
+    .download-btn:hover {
+        background: #00ffff;
+        color: black;
+    }
+</style>
+</head>
+
+<body>
+
+<header>
+    <button class="menu-btn" onclick="toggleMenu()">☰ Menu</button>
+    <h2 class="neon" style="margin-left:20px;">MarfoMedia</h2>
+</header>
+
+<div class="sidebar" id="sidebar">
+    <a href="#" onclick="showPage('home')">🏠 Home</a>
+    <a href="#" onclick="showPage('media')">🎬 Med</a>
+</div>
+
+<!-- Home Page -->
+<div class="page" id="home">
+    <h1 class="neon">Welcome to Marfo Media</h1>
+    <p>Your place to download media files.</p>
+</div>
+
+<!-- Media Page -->
+<div class="page" id="media" style="display:none;">
+    <h1 class="neon">Media Downloads</h1>
+
+    <!-- Media Item 1 -->
+    <div class="media-card">
+        <h3>🎵 Song</h3>
+        <p>Sample audio file</p>
+        <a href="song.mp3" download>
+            <button class="download-btn">⬇ Get</button>
+        </a>
+    </div>
+
+    <!-- Media Item 2 -->
+    <div class="media-card">
+        <h3>🎬 Vid</h3>
+        <p>Sample video file</p>
+        <a href="video.mp4" download>
+            <button class="download-btn">⬇ Get</button>
+        </a>
+    </div>
+
+</div>
+
+<script>
+function toggleMenu() {
+    document.getElementById("sidebar").classList.toggle("active");
+}
+
+function showPage(pageId) {
+    document.getElementById("home").style.display = "none";
+    document.getElementById("media").style.display = "none";
+    document.getElementById(pageId).style.display = "block";
+}
+</script>
+
+</body>
+</html>
