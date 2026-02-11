@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - QWEN-911</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0b0f1a;
+  --panel: #11162a;
+  --text: #eaeaf0;
+  --muted: #9aa1b2;
+  --accent: linear-gradient(120deg, #3b82f6, #8b5cf6, #2dd4bf);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* LOGIN BOX */
+.login-box {
+  background: var(--panel);
+  padding: 40px;
+  border-radius: 20px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.logo {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  margin: 0 auto 20px;
+  background: var(--accent);
+  animation: spin 6s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+h2 {
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background: #1a2040;
+  color: white;
+  font-size: 0.95rem;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+footer {
+  margin-top: 25px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <div class="logo"></div>
+  <h2>QWEN-911</h2>
+
+  <input type="text" placeholder="Username">
+  <input type="password" placeholder="Password">
+
+  <!-- Login button -->
+  <a href="index.html">
+    <button>Login</button>
+  </a>
+
+  <footer>Powered by STARIS Inc.</footer>
+</div>
+
+</body>
+</html>
