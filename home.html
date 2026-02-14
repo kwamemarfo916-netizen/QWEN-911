@@ -9,7 +9,7 @@
 
 <style>
 :root {
-  --bg: #0b0f1a;
+  --bg: #0b0f1a; 
   --panel: #11162a;
   --text: #eaeaf0;
   --muted: #9aa1b2;
@@ -161,6 +161,21 @@ footer {
 .main-btn:hover {
   transform: translateY(-2px);
   }
+  .live-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: linear-gradient(90deg, blue, purple, aquamarine);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.live-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px purple;
+  }
 </style>
 </head>
 
@@ -177,6 +192,7 @@ footer {
 </div>
 
 <!-- MAIN -->
+  <a href="chat.html" class="live-btn">💬 Live Chat</a>
 <div class="main">
   <div class="hero">
     <h1>QWEN-911</h1>
