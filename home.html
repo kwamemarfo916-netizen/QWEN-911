@@ -208,6 +208,39 @@ footer {
     <h6>Powered by STARIS Inc.</h6>
   </footer>
 </div>
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+  authDomain: "qwen-911.firebaseapp.com",
+  projectId: "qwen-911",
+  storageBucket: "qwen-911.firebasestorage.app",
+  messagingSenderId: "518019892837",
+  appId: "1:518019892837:web:9972dd63d8dca7936ea88c",
+  measurementId: "G-0LZW0FZ3Q0"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+onAuthStateChanged(auth, user => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    document.getElementById("user").innerText =
+      "Welcome, " + user.email;
+  }
+});
+
+window.logout = () => {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
+  });
+};
+    </script>
 
 </body>
     </html>
