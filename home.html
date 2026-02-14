@@ -147,6 +147,20 @@ footer {
   font-size: 0.85rem;
   color: var(--muted);
 }
+  .main-btn {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.3s;
+}
+
+.main-btn:hover {
+  transform: translateY(-2px);
+  }
 </style>
 </head>
 
@@ -201,8 +215,7 @@ footer {
         allowfullscreen>
         </iframe>
     </div>
-    <h3 id="user"></h3>
-<button onclick="logout()">Logout</button>
+   <button class="main-btn" onclick="logout()">Logout</button>
     <div>
   <footer>
     <h6>Powered by STARIS Inc.</h6>
