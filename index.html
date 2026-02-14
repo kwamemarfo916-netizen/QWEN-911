@@ -12,18 +12,12 @@
   --bg: #0b0f1a;
   --panel: #11162a;
   --text: #eaeaf0;
-  --muted: #9aa1b2;
   --accent: linear-gradient(120deg, #3b82f6, #8b5cf6, #2dd4bf);
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
-
 body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
   background: var(--bg);
   color: var(--text);
   display: flex;
@@ -32,32 +26,12 @@ body {
   height: 100vh;
 }
 
-/* LOGIN BOX */
 .login-box {
   background: var(--panel);
   padding: 40px;
   border-radius: 20px;
   width: 320px;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-
-.logo {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  margin: 0 auto 20px;
-  background: var(--accent);
-  animation: spin 6s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-h2 {
-  margin-bottom: 10px;
 }
 
 input {
@@ -68,30 +42,17 @@ input {
   border-radius: 10px;
   background: #1a2040;
   color: white;
-  font-size: 0.95rem;
 }
 
 button {
   width: 100%;
   padding: 12px;
-  margin-top: 15px;
+  margin-top: 10px;
   border: none;
   border-radius: 10px;
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   color: white;
-  font-size: 1rem;
   cursor: pointer;
-  transition: 0.3s;
-}
-
-button:hover {
-  transform: translateY(-2px);
-}
-
-footer {
-  margin-top: 25px;
-  font-size: 0.8rem;
-  color: var(--muted);
 }
 </style>
 </head>
@@ -99,21 +60,21 @@ footer {
 <body>
 
 <div class="login-box">
-  <div class="logo"></div>
   <h2>QWEN-911</h2>
 
-  <input type="text" placeholder="Username">
-  <input type="password" placeholder="Password">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-  <!-- Login button -->
-  <a href="home.html">
-    <button>Login</button>
-  </a>
-  <script type="module">
+  <button id="signup">Sign Up</button>
+  <button id="login">Login</button>
+</div>
+
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } 
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+// Your config
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
@@ -127,24 +88,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    document.getElementById("user").innerText =
-      "Welcome, " + user.email;
-  }
-});
+// Sign up
+document.getElementById("signup").onclick = () => {
+  const email = email.value;
+  const password = password.value;
 
-window.logout = () => {
-  signOut(auth).then(() => {
-    window.location.href = "index.html";
-  });
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Account created!");
+      window.location.href = "home.html";
+    })
+    .catch(e => alert(e.message));
 };
-  </script>
 
-  <footer>Powered by STARIS Inc.</footer>
-</div>
+// Login
+document.getElementById("login").onclick = () => {
+  const email = email.value;
+  const password = password.value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      window.location.href = "home.html";
+    })
+    .catch(e => alert(e.message));
+};
+</script>
 
 </body>
 </html>
