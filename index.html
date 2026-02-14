@@ -5,21 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - QWEN-911</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
-:root {
-  --bg: #0b0f1a;
-  --panel: #11162a;
-  --text: #eaeaf0;
-  --accent: linear-gradient(120deg, #3b82f6, #8b5cf6, #2dd4bf);
-}
-
 body {
   margin: 0;
-  font-family: "Inter", sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family: Arial, sans-serif;
+  background: #0b0f1a;
+  color: white;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -27,7 +18,7 @@ body {
 }
 
 .login-box {
-  background: var(--panel);
+  background: #11162a;
   padding: 40px;
   border-radius: 20px;
   width: 320px;
@@ -69,20 +60,19 @@ button {
   <button id="login">Login</button>
 </div>
 
+<!-- Firebase script goes here -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-// Your config
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
   projectId: "qwen-911",
   storageBucket: "qwen-911.firebasestorage.app",
   messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:9972dd63d8dca7936ea88c",
-  measurementId: "G-0LZW0FZ3Q0"
+  appId: "1:518019892837:web:d9a2c862a416c1176ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -90,8 +80,8 @@ const auth = getAuth(app);
 
 // Sign up
 document.getElementById("signup").onclick = () => {
-  const email = email.value;
-  const password = password.value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   createUserWithEmailAndPassword(auth, email, password)
     .then(() => {
@@ -103,8 +93,8 @@ document.getElementById("signup").onclick = () => {
 
 // Login
 document.getElementById("login").onclick = () => {
-  const email = email.value;
-  const password = password.value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
