@@ -1,166 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Live Chat - QWEN-911</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: linear-gradient(120deg, blue, purple, aquamarine);
-      color: white;
-    }
+    <title>QWEN-911 Live Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(120deg, blue, purple, aquamarine);
+            color: white;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-    header {
-      padding: 15px;
-      background: rgba(0,0,0,0.4);
-      text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-    }
+        #chat {
+            width: 400px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
 
-    .container {
-      display: flex;
-      height: 90vh;
-    }
+        #messages {
+            list-style: none;
+            padding: 0;
+            height: 300px;
+            overflow-y: auto;
+        }
 
-    .stream, .media {
-      flex: 2;
-      padding: 15px;
-    }
+        #messages li {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+        }
 
-    .chat {
-      flex: 1;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      flex-direction: column;
-    }
+        form {
+            display: flex;
+            gap: 5px;
+        }
 
-    #messages {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-    }
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+        }
 
-    .msg {
-      margin-bottom: 8px;
-      padding: 6px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 6px;
-    }
-
-    .input-box {
-      display: flex;
-      padding: 10px;
-      background: rgba(0,0,0,0.6);
-    }
-
-    .input-box input {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 5px;
-    }
-
-    .input-box button {
-      margin-left: 8px;
-      padding: 8px 12px;
-      border: none;
-      background: purple;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    video {
-      width: 100%;
-      border-radius: 10px;
-    }
-
-    .media img {
-      width: 100%;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-  </style>
+        button {
+            padding: 10px;
+            background: aquamarine;
+            border: none;
+            color: black;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-
-<header>
-  💬 Live Stream & Chat
-</header>
-
-<div class="container">
-  
-  <!-- Stream Section -->
-  <div class="stream">
-    <h2>Live Stream</h2>
-    <video controls>
-      <source src="sample.mp4" type="video/mp4">
-    </video>
-  </div>
-
-  <!-- Chat Section -->
-  <div class="chat">
-    <div id="messages"></div>
-
-    <div class="input-box">
-      <input id="messageInput" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
+    <div id="chat">
+        <h2>💬 QWEN-911 Live Chat</h2>
+        <ul id="messages"></ul>
+        <form id="form">
+            <input id="input" autocomplete="off" placeholder="Type a message..." />
+            <button>Send</button>
+        </form>
     </div>
-  </div>
 
-  <!-- Media Section -->
-  <div class="media">
-    <h2>Media</h2>
-    <img src="https://via.placeholder.com/400x200" alt="Media">
-    <img src="https://via.placeholder.com/400x200" alt="Media">
-  </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, push, onChildAdded } 
+        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-</div>
+        const firebaseConfig = {
+          apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+          authDomain: "qwen-911.firebaseapp.com",
+          databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+          projectId: "qwen-911",
+          storageBucket: "qwen-911.firebasestorage.app",
+          messagingSenderId: "518019892837",
+          appId: "1:518019892837:web:9972dd63d8dca7936ea88c",
+          measurementId: "G-0LZW0FZ3Q0"
+        };
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_PROJECT_ID"
-};
+        const form = document.getElementById("form");
+        const input = document.getElementById("input");
+        const messages = document.getElementById("messages");
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (input.value) {
+                push(ref(db, "messages"), input.value);
+                input.value = "";
+            }
+        });
 
-signInAnonymously(auth);
-
-window.sendMessage = async function () {
-  const input = document.getElementById("messageInput");
-  const text = input.value;
-
-  if (!text) return;
-
-  await addDoc(collection(db, "messages"), {
-    text: text,
-    time: Date.now()
-  });
-
-  input.value = "";
-};
-
-const q = query(collection(db, "messages"), orderBy("time"));
-
-onSnapshot(q, (snapshot) => {
-  const chat = document.getElementById("messages");
-  chat.innerHTML = "";
-
-  snapshot.forEach((doc) => {
-    const msg = doc.data();
-    chat.innerHTML += `<div class="msg">${msg.text}</div>`;
-  });
-});
-</script>
-
+        onChildAdded(ref(db, "messages"), (snapshot) => {
+            const item = document.createElement("li");
+            item.textContent = snapshot.val();
+            messages.appendChild(item);
+        });
+    </script>
 </body>
-  </html>
+</html>
