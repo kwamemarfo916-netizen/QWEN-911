@@ -4,170 +4,287 @@
     <title>QWEN-911 Live Chat</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(120deg, blue, purple, aquamarine);
-            color: white;
-            height: 100vh;
             margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0e1621;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .chat-header {
+            background: #17212b;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
         }
 
-        #chat {
-            width: 400px;
-            background: rgba(0,0,0,0.7);
-            padding: 15px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: red;
+            border-radius: 50%;
+            animation: blink 1s infinite;
         }
 
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        #onlineCount {
+            margin-left: auto;
+            font-size: 14px;
+            color: aquamarine;
+        }
+
+        /* Messages */
         #messages {
+            flex: 1;
             list-style: none;
-            padding: 0;
-            height: 300px;
+            padding: 15px;
+            margin: 0;
             overflow-y: auto;
         }
 
         #messages li {
-            padding: 8px;
-            margin: 5px 0;
-            background: rgba(255,255,255,0.1);
-            border-radius: 6px;
+            margin-bottom: 12px;
+            background: #1f2a36;
+            padding: 10px;
+            border-radius: 10px;
+            position: relative;
         }
 
-        form {
+        .username {
+            font-weight: bold;
+            color: aquamarine;
+            font-size: 13px;
+        }
+
+        .timestamp {
+            font-size: 11px;
+            color: gray;
+            position: absolute;
+            bottom: 5px;
+            left: 10px;
+        }
+
+        /* Input Area */
+        .input-container {
+            position: fixed;
+            bottom: 85px; /* pushed above nav */
+            left: 0;
+            width: 100%;
+            background: #17212b;
+            padding: 10px;
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
 
-        input {
+        .input-container input {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
+            border-radius: 20px;
             border: none;
-            border-radius: 6px;
         }
 
-        button {
-            padding: 10px;
+        .input-container button {
             background: aquamarine;
             border: none;
-            color: black;
-            border-radius: 6px;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 16px;
             cursor: pointer;
         }
+
+        /* Bottom Floating Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(20,20,30,0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 12px 10px;
+            border-radius: 25px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .bottom-nav a {
+            text-decoration: none;
+            color: white;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .bottom-nav a:hover {
+            color: aquamarine;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Floating Chat Button */
+        .floating-chat {
+            position: fixed;
+            bottom: 95px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: aquamarine;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: black;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,0,0,0.6);
+            z-index: 1001;
+        }
+
+        .floating-chat:hover {
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
 <body>
-    <div id="chat">
-        <h2>💬 QWEN-911 Live Chat</h2>
-        <ul id="messages"></ul>
-        <form id="form">
-            <input id="input" autocomplete="off" placeholder="Type a message..." />
-            <button>Send</button>
-        </form>
-    </div>
-    <!-- Bottom Floating Navigation -->
-<style>
-.bottom-nav {
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 500px;
-    background: rgba(20,20,30,0.95);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 12px 10px;
-    border-radius: 25px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
-    z-index: 1000;
-}
 
-.bottom-nav a {
-    text-decoration: none;
-    color: white;
-    text-align: center;
-    font-size: 13px;
-}
+<!-- Header -->
+<div class="chat-header">
+    LIVE CHAT
+    <div class="live-dot"></div>
+    <span id="onlineCount">0 online</span>
+</div>
 
-.bottom-nav a:hover {
-    color: aquamarine;
-}
+<!-- Messages -->
+<ul id="messages"></ul>
 
-.nav-icon {
-    font-size: 20px;
-    display: block;
-    margin-bottom: 4px;
-}
-</style>
+<!-- Input -->
+<div class="input-container">
+    <input id="input" placeholder="Type a message..." autocomplete="off">
+    <button id="sendBtn">➤</button>
+</div>
 
+<!-- Floating Chat Button -->
+<div class="floating-chat" onclick="window.location.href='chat.html'">💬</div>
+
+<!-- Bottom Navigation -->
 <div class="bottom-nav">
     <a href="home.html">
-        <span class="nav-icon">🏠</span>
-        Home
+        <span class="nav-icon">🏠</span>Home
     </a>
-
     <a href="chat-list.html">
-        <span class="nav-icon">💬</span>
-        Chats
+        <span class="nav-icon">💬</span>Chats
     </a>
-
     <a href="stream.html">
-        <span class="nav-icon">📺</span>
-        Stream
+        <span class="nav-icon">📺</span>Stream
     </a>
-
     <a href="data.html">
-        <span class="nav-icon">📡</span>
-        Data
+        <span class="nav-icon">📡</span>Data
     </a>
-
     <a href="profile.html">
-        <span class="nav-icon">👤</span>
-        Profile
+        <span class="nav-icon">👤</span>Profile
     </a>
 </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, push, onChildAdded } 
-        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<!-- Firebase & Chat Logic -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { 
+    getDatabase, 
+    ref, 
+    push, 
+    onChildAdded,
+    set,
+    onDisconnect,
+    onValue,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-          authDomain: "qwen-911.firebaseapp.com",
-          databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
-          projectId: "qwen-911",
-          storageBucket: "qwen-911.firebasestorage.app",
-          messagingSenderId: "518019892837",
-          appId: "1:518019892837:web:9972dd63d8dca7936ea88c",
-          measurementId: "G-0LZW0FZ3Q0"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+  authDomain: "qwen-911.firebaseapp.com",
+  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+  projectId: "qwen-911",
+  storageBucket: "qwen-911.firebasestorage.app",
+  messagingSenderId: "518019892837",
+  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+};
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-        const form = document.getElementById("form");
-        const input = document.getElementById("input");
-        const messages = document.getElementById("messages");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const messages = document.getElementById("messages");
+const onlineCount = document.getElementById("onlineCount");
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            if (input.value) {
-                push(ref(db, "messages"), input.value);
-                input.value = "";
-            }
+// ===== ONLINE USERS SYSTEM =====
+const userId = Date.now().toString();
+const userStatusRef = ref(db, "onlineUsers/" + userId);
+set(userStatusRef, true);
+onDisconnect(userStatusRef).remove();
+
+onValue(ref(db, "onlineUsers"), (snapshot) => {
+    const users = snapshot.val();
+    const count = users ? Object.keys(users).length : 0;
+    onlineCount.textContent = count + " online";
+});
+
+// ===== SEND MESSAGE =====
+function sendMessage() {
+    if (input.value.trim() !== "") {
+        push(ref(db, "messages"), {
+            username: "User",
+            text: input.value,
+            timestamp: serverTimestamp()
         });
+        input.value = "";
+    }
+}
 
-        onChildAdded(ref(db, "messages"), (snapshot) => {
-            const item = document.createElement("li");
-            item.textContent = snapshot.val();
-            messages.appendChild(item);
-        });
-    </script>
+sendBtn.addEventListener("click", sendMessage);
+input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
+
+// ===== DISPLAY MESSAGE =====
+onChildAdded(ref(db, "messages"), (snapshot) => {
+    const data = snapshot.val();
+    const item = document.createElement("li");
+
+    let time = "";
+    if (data.timestamp) {
+        const date = new Date(data.timestamp);
+        time = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    item.innerHTML = `
+        <div class="username">${data.username}</div>
+        <div>${data.text}</div>
+        <div class="timestamp">${time}</div>
+    `;
+
+    messages.appendChild(item);
+    messages.scrollTop = messages.scrollHeight;
+});
+</script>
 </body>
-</html>
+    </html>
