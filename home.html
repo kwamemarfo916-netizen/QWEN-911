@@ -30,49 +30,6 @@ body {
   height: 100vh;
   overflow: hidden;
 }
-
-/* ===== SIDEBAR ===== */
-.sidebar {
-  width: 90px;
-  background: var(--panel);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  gap: 25px;
-  border-right: 1px solid rgba(255,255,255,0.05);
-}
-
-.logo {
-  width: 45px;
-  height: 45px;
-  border-radius: 14px;
-  background: var(--accent);
-  animation: spin 6s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.nav-btn {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  background: #1a2040;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
-.nav-btn:hover {
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  transform: translateY(-4px);
-}
-
 /* ===== MAIN CONTENT ===== */
 .main {
   flex: 1;
@@ -238,6 +195,70 @@ footer {
     <h6>Powered by STARIS Inc.</h6>
     <a href="privacy.html">Privacy Policy</a>
   </footer>
+</div>
+    <!-- Bottom Floating Navigation -->
+<style>
+.bottom-nav {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background: rgba(20,20,30,0.95);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 12px 10px;
+    border-radius: 25px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+.bottom-nav a {
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    font-size: 13px;
+}
+
+.bottom-nav a:hover {
+    color: aquamarine;
+}
+
+.nav-icon {
+    font-size: 20px;
+    display: block;
+    margin-bottom: 4px;
+}
+</style>
+
+<div class="bottom-nav">
+    <a href="home.html">
+        <span class="nav-icon">🏠</span>
+        Home
+    </a>
+
+    <a href="chat-list.html">
+        <span class="nav-icon">💬</span>
+        Chats
+    </a>
+
+    <a href="stream.html">
+        <span class="nav-icon">📺</span>
+        Stream
+    </a>
+
+    <a href="data.html">
+        <span class="nav-icon">📡</span>
+        Data
+    </a>
+
+    <a href="profile.html">
+        <span class="nav-icon">👤</span>
+        Profile
+    </a>
 </div>
     <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
