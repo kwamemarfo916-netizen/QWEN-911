@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>QWEN-911 Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#0e1621;
+color:white;
+padding:15px;
+}
+
+h2{
+margin-top:15px;
+}
+
+/* Tables */
+table{
+width:100%;
+border-collapse:collapse;
+margin-bottom:20px;
+}
+
+th,td{
+padding:10px;
+text-align:left;
+border-bottom:1px solid #1f2a36;
+}
+
+th{
+background:#17212b;
+}
+
+tr:hover{
+background:#1f2a36;
+}
+
+/* Buttons */
+button{
+padding:6px 12px;
+border:none;
+border-radius:6px;
+background:aquamarine;
+cursor:pointer;
+color:black;
+font-weight:bold;
+}
+
+input{
+padding:6px;
+border-radius:6px;
+border:none;
+width:100px;
+}
+</style>
+</head>
+<body>
+
+<h1>💻 QWEN-911 Admin Dashboard</h1>
+
+<h2>👥 Users & Balances</h2>
+<table id="usersTable">
+<tr><th>Email</th><th>Balance (GHS)</th><th>Manual Credit</th></tr>
+</table>
+
+<h2>📦 Transactions</h2>
+<table id="txTable">
+<tr><th>User</th><th>Network</th><th>Amount</th><th>Phone</th><th>TX ID</th><th>Date</th></tr>
+</table>
+
+<h2>➕ Top-ups</h2>
+<table id="topupTable">
+<tr><th>User</th><th>Amount</th><th>Date</th></tr>
+</table>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get, update, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+/* Firebase config */
+const firebaseConfig = {
+apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+authDomain: "qwen-911.firebaseapp.com",
+databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+projectId: "qwen-911",
+storageBucket: "qwen-911.firebasestorage.app",
+messagingSenderId: "518019892837",
+appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth();
+
+const adminEmail = "kwamemarfo916@gmail.com";
+
+/* AUTH CHECK */
+onAuthStateChanged(auth, user=>{
+    if(!user || user.email !== adminEmail){
+        alert("Access denied. Admin only.");
+        window.location.href="login.html";
+    }else{
+        loadUsers();
+        loadTransactions();
+        loadTopups();
+    }
+});
+
+/* Load Users & Balances */
+async function loadUsers(){
+    const snap = await get(ref(db,"users"));
+    const table = document.getElementById("usersTable");
+    if(snap.exists()){
+        const users = snap.val();
+        for(const uid in users){
+            const row = table.insertRow();
+            row.insertCell(0).textContent = users[uid].email || uid;
+            row.insertCell(1).textContent = users[uid].balance.toFixed(2);
+
+            const creditCell = row.insertCell(2);
+            const input = document.createElement("input");
+            input.type="number";
+            input.placeholder="Amount";
+            const btn = document.createElement("button");
+            btn.textContent="Credit";
+            btn.onclick=async ()=>{
+                const amt=Number(input.value);
+                if(amt>0){
+                    const newBal=users[uid].balance+amt;
+                    await update(ref(db,"users/"+uid),{balance:newBal});
+                    alert("Wallet credited successfully!");
+                    location.reload();
+                }
+            }
+            creditCell.appendChild(input);
+            creditCell.appendChild(btn);
+        }
+    }
+}
+
+/* Load Transactions */
+async function loadTransactions(){
+    const snap = await get(ref(db,"transactions"));
+    const table = document.getElementById("txTable");
+    if(snap.exists()){
+        const allTx = snap.val();
+        for(const uid in allTx){
+            const userTx = allTx[uid];
+            for(const txId in userTx){
+                const tx = userTx[txId];
+                const row = table.insertRow();
+                row.insertCell(0).textContent = tx.user;
+                row.insertCell(1).textContent = tx.network;
+                row.insertCell(2).textContent = tx.amount;
+                row.insertCell(3).textContent = tx.phone;
+                row.insertCell(4).textContent = tx.transactionId;
+                row.insertCell(5).textContent = tx.date;
+            }
+        }
+    }
+}
+
+/* Load Top-ups */
+async function loadTopups(){
+    const snap = await get(ref(db,"topups"));
+    const table = document.getElementById("topupTable");
+    if(snap.exists()){
+        const allTop = snap.val();
+        for(const uid in allTop){
+            const userTop = allTop[uid];
+            for(const topId in userTop){
+                const top = userTop[topId];
+                const row = table.insertRow();
+                row.insertCell(0).textContent = top.user || uid;
+                row.insertCell(1).textContent = top.amount;
+                row.insertCell(2).textContent = top.date;
+            }
+        }
+    }
+}
+</script>
+
+</body>
+  </html>
