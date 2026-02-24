@@ -10,159 +10,180 @@ margin:0;
 font-family:Arial, sans-serif;
 background:#0e1621;
 color:white;
-display:flex;
-flex-direction:column;
-height:100vh;
 }
 
-/* HEADER */
-.chat-header{
+/* NAVBAR */
+.navbar{
 background:#17212b;
 padding:15px;
 display:flex;
+justify-content:space-between;
 align-items:center;
-gap:8px;
+}
+
+.navbar a{
+color:white;
+text-decoration:none;
+margin-left:15px;
+}
+
+/* CHAT WRAPPER */
+.chat-wrapper{
+width:95%;
+max-width:900px;
+margin:20px auto;
+background:rgba(23,33,43,0.6);
+backdrop-filter:blur(15px);
+border-radius:20px;
+box-shadow:0 0 25px rgba(0,255,200,0.1);
+display:flex;
+flex-direction:column;
+height:75vh;
+overflow:hidden;
+}
+
+.chat-header{
+padding:15px;
+background:linear-gradient(90deg,#0084ff,aquamarine);
 font-weight:bold;
+text-align:center;
 }
 
-.live-dot{
-width:10px;
-height:10px;
-background:red;
-border-radius:50%;
-animation:blink 1s infinite;
-}
-
-@keyframes blink{
-0%{opacity:1;}
-50%{opacity:.3;}
-100%{opacity:1;}
-}
-
-#onlineCount{
-margin-left:auto;
-font-size:13px;
-color:aquamarine;
-}
-
-/* MESSAGE AREA */
-#messages{
+.chat-messages{
 flex:1;
 overflow-y:auto;
 padding:15px;
 display:flex;
 flex-direction:column;
-gap:10px;
+gap:8px;
 }
 
 .message{
-max-width:75%;
-padding:10px;
-border-radius:15px;
+max-width:70%;
+padding:12px 14px;
+border-radius:18px;
+font-size:14px;
+animation:fadeIn .2s ease;
 position:relative;
-word-wrap:break-word;
-cursor:pointer;
 }
 
-.left{
-background:#1f2a36;
-align-self:flex-start;
-}
-
-.right{
-background:aquamarine;
-color:black;
+.sent{
 align-self:flex-end;
+background:linear-gradient(135deg,#0084ff,#00c6ff);
+border-bottom-right-radius:5px;
 }
 
-.username{
+.received{
+align-self:flex-start;
+background:#1f2a36;
+border-bottom-left-radius:5px;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(5px);}
+to{opacity:1;transform:translateY(0);}
+}
+
+.reply-box{
 font-size:12px;
-font-weight:bold;
-margin-bottom:3px;
-}
-
-.timestamp{
-font-size:10px;
 opacity:.7;
-margin-top:5px;
+border-left:3px solid aquamarine;
+padding-left:6px;
+margin-bottom:5px;
 }
 
 .reply-preview{
-background:#2a3a4a;
-padding:5px 8px;
-border-left:3px solid aquamarine;
-font-size:11px;
-margin-bottom:5px;
-border-radius:5px;
+background:#1f2a36;
+padding:8px 12px;
+font-size:12px;
+display:none;
+border-left:4px solid aquamarine;
 }
 
-img.chat-image{
-max-width:100%;
-border-radius:10px;
-margin-top:5px;
-}
-
-/* INPUT AREA */
-.input-container{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#17212b;
-padding:8px;
+.chat-input-area{
 display:flex;
-gap:6px;
-align-items:center;
+padding:10px;
+background:#17212b;
+gap:8px;
 }
 
-.input-container input[type=text]{
+#messageInput{
 flex:1;
-padding:10px;
+padding:10px 15px;
 border-radius:20px;
 border:none;
+outline:none;
 }
 
-.input-container button{
-background:aquamarine;
+.chat-input-area button{
+padding:10px 15px;
 border:none;
-padding:8px 12px;
-border-radius:50%;
+border-radius:20px;
+background:aquamarine;
 cursor:pointer;
+font-weight:bold;
 }
 
-input[type=file]{
-display:none;
+.message img{
+max-width:100%;
+border-radius:12px;
+margin-top:6px;
+}
+
+.tick{
+font-size:12px;
+opacity:.6;
+text-align:right;
+margin-top:3px;
+}
+
+#typingIndicator{
+padding:8px 15px;
+font-size:13px;
+opacity:.7;
 }
 </style>
 </head>
+
 <body>
 
-<div class="chat-header">
-LIVE CHAT
-<div class="live-dot"></div>
-<span id="onlineCount">0 online</span>
+<div class="navbar">
+<div><strong>QWEN-911</strong></div>
+<div>
+<a href="index.html">Home</a>
+<a href="data.html">Data</a>
+<a href="profile.html">Profile</a>
+</div>
 </div>
 
-<div id="messages"></div>
+<div class="chat-wrapper">
 
-<div class="input-container">
-<label for="imageUpload">📎</label>
-<input type="file" id="imageUpload" accept="image/*">
-<input id="input" type="text" placeholder="Type message...">
-<button id="sendBtn">➤</button>
+<div class="chat-header">
+💬 Global Live Chat
+</div>
+
+<div id="messages" class="chat-messages"></div>
+<div id="typingIndicator"></div>
+<div id="replyPreview" class="reply-preview"></div>
+
+<div class="chat-input-area">
+<input type="file" id="imageInput" hidden>
+<button onclick="document.getElementById('imageInput').click()">📎</button>
+<input id="messageInput" placeholder="Type a message...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { 
-getDatabase, ref, push, onChildAdded,
-set, onDisconnect, onValue, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import {
-getStorage, ref as sRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getDatabase, ref, push, onChildAdded, update, set, remove, onValue } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-/* YOUR REAL CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain: "qwen-911.firebaseapp.com",
@@ -175,99 +196,157 @@ appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth();
 const storage = getStorage(app);
 
-const messagesDiv = document.getElementById("messages");
-const input = document.getElementById("input");
-const sendBtn = document.getElementById("sendBtn");
-const imageUpload = document.getElementById("imageUpload");
-const onlineCount = document.getElementById("onlineCount");
+let currentUser=null;
+let replyTo=null;
 
-/* USERNAME FROM EMAIL */
-let currentUserEmail = localStorage.getItem("userEmail") || "user@example.com";
-let username = currentUserEmail.replace("@example.com","");
-let replyTo = null;
+const typingRef = ref(db,"typing/global");
 
-/* ONLINE USERS SYSTEM */
-const userId = Date.now().toString();
-const userRef = ref(db,"onlineUsers/"+userId);
-set(userRef,true);
-onDisconnect(userRef).remove();
-
-onValue(ref(db,"onlineUsers"),snap=>{
-const users = snap.val();
-onlineCount.textContent = users ? Object.keys(users).length+" online":"0 online";
+onAuthStateChanged(auth,user=>{
+if(user){
+currentUser=user;
+loadMessages();
+setupTypingListener();
+}else{
+window.location.href="login.html";
+}
 });
 
-/* SEND MESSAGE FUNCTION */
-function sendMessage(text,imageUrl){
-push(ref(db,"messages"),{
-username,
-text:text||"",
-imageUrl:imageUrl||"",
-replyTo:replyTo||"",
-timestamp:serverTimestamp()
+function loadMessages(){
+const chatRef = ref(db,"chats/global");
+
+onChildAdded(chatRef, snap=>{
+const msg=snap.val();
+const key=snap.key;
+
+if(msg.senderId !== currentUser.uid && msg.status==="sent"){
+update(ref(db,"chats/global/"+key),{status:"delivered"});
+}
+
+displayMessage(msg);
 });
+}
+
+function displayMessage(msg){
+const div=document.createElement("div");
+div.classList.add("message");
+div.classList.add(msg.senderId===currentUser.uid ? "sent":"received");
+
+if(msg.replyText){
+const replyDiv=document.createElement("div");
+replyDiv.classList.add("reply-box");
+replyDiv.textContent=msg.replyText;
+div.appendChild(replyDiv);
+}
+
+if(msg.text) div.appendChild(document.createTextNode(msg.text));
+if(msg.imageUrl){
+const img=document.createElement("img");
+img.src=msg.imageUrl;
+div.appendChild(img);
+}
+
+if(msg.senderId===currentUser.uid){
+const tick=document.createElement("div");
+tick.classList.add("tick");
+tick.textContent=msg.status==="delivered" ? "✓✓" : "✓";
+div.appendChild(tick);
+}
+
+div.onclick=()=>{
+replyTo=msg.text || "Image";
+document.getElementById("replyPreview").style.display="block";
+document.getElementById("replyPreview").textContent="Replying to: "+replyTo;
+};
+
+document.getElementById("messages").appendChild(div);
+div.scrollIntoView();
+}
+
+// IMAGE COMPRESS
+async function compressImage(file){
+return new Promise((resolve)=>{
+const reader=new FileReader();
+reader.readAsDataURL(file);
+reader.onload=(e)=>{
+const img=new Image();
+img.src=e.target.result;
+img.onload=()=>{
+const canvas=document.createElement("canvas");
+const maxWidth=800;
+const scale=maxWidth/img.width;
+canvas.width=maxWidth;
+canvas.height=img.height*scale;
+const ctx=canvas.getContext("2d");
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+canvas.toBlob(blob=>resolve(blob),"image/jpeg",0.7);
+};
+};
+});
+}
+
+// TYPING INDICATOR
+function setupTypingListener(){
+document.getElementById("messageInput").addEventListener("input",async()=>{
+const username=currentUser.email.replace("@gmail.com","");
+await set(ref(db,"typing/global/"+currentUser.uid),{name:username});
+
+clearTimeout(window.typingTimeout);
+window.typingTimeout=setTimeout(()=>{
+remove(ref(db,"typing/global/"+currentUser.uid));
+},1500);
+});
+
+onValue(typingRef,(snapshot)=>{
+const data=snapshot.val();
+const indicator=document.getElementById("typingIndicator");
+if(!data){indicator.textContent=""; return;}
+
+const typers=Object.values(data)
+.filter(t=>t.name!==currentUser.email.replace("@gmail.com",""))
+.map(t=>t.name);
+
+indicator.textContent=typers.length>0 ? typers.join(", ")+" is typing..." : "";
+});
+}
+
+window.sendMessage=async function(){
+const text=document.getElementById("messageInput").value;
+const file=document.getElementById("imageInput").files[0];
+if(!text && !file) return;
+
+let imageUrl=null;
+if(file){
+const compressed=await compressImage(file);
+const storageRef=sRef(storage,"chatImages/"+Date.now());
+await uploadBytes(storageRef,compressed);
+imageUrl=await getDownloadURL(storageRef);
+}
+
+// username = email without @gmail.com
+const username=currentUser.email.replace("@gmail.com","");
+
+await push(ref(db,"chats/global"),{
+senderId:currentUser.uid,
+senderName:username,
+text:text || "",
+imageUrl:imageUrl || "",
+replyText:replyTo || "",
+status:"sent",
+timestamp:Date.now()
+});
+
+document.getElementById("messageInput").value="";
+document.getElementById("imageInput").value="";
+document.getElementById("replyPreview").style.display="none";
 replyTo=null;
-input.placeholder="Type message...";
-input.value="";
-}
 
-/* TEXT SEND */
-sendBtn.onclick=()=>{
-if(input.value.trim()!==""){
-sendMessage(input.value,null);
-}
+// remove typing after send
+remove(ref(db,"typing/global/"+currentUser.uid));
 };
-
-input.addEventListener("keypress",e=>{
-if(e.key==="Enter") sendBtn.onclick();
-});
-
-/* IMAGE UPLOAD */
-imageUpload.addEventListener("change",async e=>{
-const file = e.target.files[0];
-if(!file) return;
-
-const imageRef = sRef(storage,"chatImages/"+Date.now());
-await uploadBytes(imageRef,file);
-const url = await getDownloadURL(imageRef);
-
-sendMessage(null,url);
-});
-
-/* DISPLAY MESSAGES */
-onChildAdded(ref(db,"messages"),snap=>{
-const data = snap.val();
-
-const msgDiv = document.createElement("div");
-msgDiv.classList.add("message");
-msgDiv.classList.add(data.username===username?"right":"left");
-
-let time="";
-if(data.timestamp){
-const date=new Date(data.timestamp);
-time=date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
-
-msgDiv.innerHTML=`
-<div class="username">${data.username}</div>
-${data.replyTo?`<div class="reply-preview">${data.replyTo}</div>`:""}
-${data.text?`<div>${data.text}</div>`:""}
-${data.imageUrl?`<img src="${data.imageUrl}" class="chat-image">`:""}
-<div class="timestamp">${time}</div>
-`;
-
-/* WHATSAPP STYLE REPLY */
-msgDiv.onclick=()=>{
-replyTo = data.text || "Image";
-input.placeholder="Replying to message...";
-};
-
-messagesDiv.appendChild(msgDiv);
-messagesDiv.scrollTop=messagesDiv.scrollHeight;
-});
 </script>
 
 </body>
-</html>
+  </html>
