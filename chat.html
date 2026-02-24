@@ -7,24 +7,9 @@
 <style>
 body{
 margin:0;
-font-family:Arial, sans-serif;
+font-family:Arial,sans-serif;
 background:#0e1621;
 color:white;
-}
-
-/* NAVBAR */
-.navbar{
-background:#17212b;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.navbar a{
-color:white;
-text-decoration:none;
-margin-left:15px;
 }
 
 /* CHAT WRAPPER */
@@ -40,6 +25,7 @@ display:flex;
 flex-direction:column;
 height:75vh;
 overflow:hidden;
+padding-bottom:80px; /* space for floating menu */
 }
 
 .chat-header{
@@ -105,6 +91,15 @@ display:flex;
 padding:10px;
 background:#17212b;
 gap:8px;
+position:fixed;
+bottom:70px; /* above floating menu */
+left:50%;
+transform:translateX(-50%);
+width:95%;
+max-width:900px;
+border-radius:20px;
+box-shadow:0 0 15px rgba(0,255,200,0.3);
+z-index:900;
 }
 
 #messageInput{
@@ -142,30 +137,46 @@ padding:8px 15px;
 font-size:13px;
 opacity:.7;
 }
+
+/* ===== FLOATING EMOJI MENU ===== */
+.floating-menu{
+position:fixed;
+bottom:10px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+justify-content:space-around;
+width:300px;
+background:rgba(23,33,43,0.9);
+padding:10px;
+border-radius:50px;
+box-shadow:0 0 20px rgba(0,255,200,0.4);
+z-index:1000;
+}
+
+.floating-menu button{
+font-size:24px;
+background:none;
+border:none;
+cursor:pointer;
+color:white;
+}
 </style>
 </head>
 
 <body>
 
-<div class="navbar">
-<div><strong>QWEN-911</strong></div>
-<div>
-<a href="index.html">Home</a>
-<a href="data.html">Data</a>
-<a href="profile.html">Profile</a>
-</div>
-</div>
-
 <div class="chat-wrapper">
+  <div class="chat-header">
+    💬 Global Live Chat
+  </div>
 
-<div class="chat-header">
-💬 Global Live Chat
+  <div id="messages" class="chat-messages"></div>
+  <div id="typingIndicator"></div>
+  <div id="replyPreview" class="reply-preview"></div>
 </div>
 
-<div id="messages" class="chat-messages"></div>
-<div id="typingIndicator"></div>
-<div id="replyPreview" class="reply-preview"></div>
-
+<!-- Chat Input -->
 <div class="chat-input-area">
 <input type="file" id="imageInput" hidden>
 <button onclick="document.getElementById('imageInput').click()">📎</button>
@@ -173,6 +184,13 @@ opacity:.7;
 <button onclick="sendMessage()">Send</button>
 </div>
 
+<!-- Floating Emoji Menu -->
+<div class="floating-menu">
+<button onclick="window.location.href='index.html'">🏠</button>
+<button onclick="window.location.href='stream.html'">📺</button>
+<button onclick="window.location.href='data.html'">📶</button>
+<button onclick="window.location.href='profile.html'">👤</button>
+<button onclick="document.getElementById('messageInput').focus()">💬</button>
 </div>
 
 <script type="module">
@@ -201,7 +219,6 @@ const storage = getStorage(app);
 
 let currentUser=null;
 let replyTo=null;
-
 const typingRef = ref(db,"typing/global");
 
 onAuthStateChanged(auth,user=>{
@@ -265,7 +282,6 @@ document.getElementById("messages").appendChild(div);
 div.scrollIntoView();
 }
 
-// IMAGE COMPRESS
 async function compressImage(file){
 return new Promise((resolve)=>{
 const reader=new FileReader();
@@ -287,7 +303,7 @@ canvas.toBlob(blob=>resolve(blob),"image/jpeg",0.7);
 });
 }
 
-// TYPING INDICATOR
+// Typing Indicator
 function setupTypingListener(){
 document.getElementById("messageInput").addEventListener("input",async()=>{
 const username=currentUser.email.replace("@gmail.com","");
@@ -325,9 +341,7 @@ await uploadBytes(storageRef,compressed);
 imageUrl=await getDownloadURL(storageRef);
 }
 
-// username = email without @gmail.com
 const username=currentUser.email.replace("@gmail.com","");
-
 await push(ref(db,"chats/global"),{
 senderId:currentUser.uid,
 senderName:username,
