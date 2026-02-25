@@ -1,272 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QWEN-911</title>
+  <title>QWEN-911 Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet"
+   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<style>
-:root {
-  --bg: #0b0f1a; 
-  --panel: #11162a;
-  --text: #eaeaf0;
-  --muted: #9aa1b2;
-  --accent: linear-gradient(120deg, #3b82f6, #8b5cf6, #2dd4bf);
-}
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background: linear-gradient(-45deg,#001f3f,#3a0ca3,#00b4d8);
+      background-size:400% 400%;
+      animation: gradientMove 8s ease infinite;
+      color:white;
+      padding-bottom:90px;
+    }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", sans-serif;
-}
+    @keyframes gradientMove{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-/* ===== MAIN CONTENT ===== */
-.main {
-  flex: 1;
-  padding: 50px;
-  overflow-y: auto;
-}
+    .container{
+      padding:20px;
+    }
 
-.hero {
-  max-width: 900px;
-}
+    h1{
+      text-align:center;
+    }
 
-.hero h1 {
-  font-size: 3rem;
-  background: var(--accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+    .card{
+      background:rgba(255,255,255,0.1);
+      padding:15px;
+      border-radius:15px;
+      margin-top:15px;
+      backdrop-filter:blur(10px);
+    }
 
-.hero p {
-  margin-top: 15px;
-  font-size: 1.1rem;
-  color: var(--muted);
-}
+    /* FLOATING MENU */
+    .menu-bar{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      width:90%;
+      max-width:420px;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(20px);
+      border-radius:30px;
+      display:flex;
+      justify-content:space-around;
+      padding:12px 5px;
+      box-shadow:0 5px 25px rgba(0,0,0,0.4);
+    }
 
-/* ===== CARDS ===== */
-.cards {
-  margin-top: 50px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-}
+    .menu-bar a{
+      text-decoration:none;
+      color:#ccc;
+      font-size:20px;
+      text-align:center;
+      flex:1;
+      transition:0.3s;
+    }
 
-.card {
-  background: #121836;
-  padding: 25px;
-  border-radius: 18px;
-  transition: 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
+    .menu-bar a.active{
+      color:#00f5ff;
+      transform:translateY(-5px);
+    }
 
-.card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  opacity: 0;
-  transition: 0.3s ease;
-}
+    .menu-bar a:hover{
+      color:white;
+    }
 
-.card:hover::before {
-  opacity: 0.15;
-}
+    .logout-btn{
+      margin-top:20px;
+      width:100%;
+      padding:10px;
+      border:none;
+      border-radius:20px;
+      background:#ff4d4d;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
 
-.card:hover {
-  transform: translateY(-6px);
-}
-
-.card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.card p {
-  font-size: 0.95rem;
-  color: var(--muted);
-}
-
-/* ===== FOOTER ===== */
-footer {
-  margin-top: 80px;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-  .main-btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: 0.3s;
-}
-
-.main-btn:hover {
-  transform: translateY(-2px);
-  }
-
-  
-</style>
+  </style>
 </head>
-
 <body>
-<!-- MAIN -->
-<div class="main">
-  <div class="hero">
-    <h1>QWEN-911</h1>
-    <p>
-      A modern, cloud-inspired platform built for speed, scale, and style.
-      Clean. Powerful. Future-ready.
-    </p>
+
+<div class="container">
+  <h1>Welcome to QWEN-911</h1>
+
+  <div class="card">
+    <h3>Live Chat</h3>
+    <p>Connect with users in real-time.</p>
   </div>
 
-  <div class="cards">
-    <div class="card">
-      <h3>⚡ Fast Infrastructure</h3>
-      <p>Optimized systems designed for real-time performance and scalability.</p>
-    </div>
+  <div class="card">
+    <h3>Data Bundles</h3>
+    <p>Buy telecom bundles instantly.</p>
+  </div>
 
-    <div class="card">
-      <h3>🔐 Secure by Design</h3>
-      <p>Built-in protection layers inspired by modern cloud standards.</p>
-    </div>
+  <div class="card">
+    <h3>Streaming</h3>
+    <p>Watch live streams and media.</p>
+  </div>
 
-    <div class="card">
-      <h3>📡 Streaming Ready</h3>
-      <p>Prepared architecture for future live streaming integration.</p>
-    </div>
-
-    <div class="card">
-      <h3>🎨 Modern UI</h3>
-      <p>Firebase-inspired interface with smooth animations and clean layout.</p>
-    </div>
-    <div class="media-card">
-        <h3>🎬 Vid</h3>
-        <p>The CRUEL Physics behind Tsunamis!</p>
-        <iframe width="250" height="150"
-        src="https://www.youtube.com/embed/piH4O4doAMo"
-        frameborder="0"
-        allowfullscreen>
-        </iframe>
-    </div>
-   <button class="main-btn" onclick="logout()">Logout</button>
-    <div>
-  <footer>
-    <h6>Powered by STARIS Inc.</h6>
-    <a href="privacy.html">Privacy Policy</a>
-  </footer>
+  <button id="logoutBtn" class="logout-btn">
+    Logout
+  </button>
 </div>
-    <!-- Bottom Floating Navigation -->
-<style>
-.bottom-nav {
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 500px;
-    background: rgba(20,20,30,0.95);
-    backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 12px 10px;
-    border-radius: 25px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.6);
-    z-index: 1000;
-}
 
-.bottom-nav a {
-    text-decoration: none;
-    color: white;
-    text-align: center;
-    font-size: 13px;
-}
-
-.bottom-nav a:hover {
-    color: aquamarine;
-}
-
-.nav-icon {
-    font-size: 20px;
-    display: block;
-    margin-bottom: 4px;
-}
-</style>
-
-<div class="bottom-nav">
-    <a href="home.html">
-        <span class="nav-icon">🏠</span>
-        Home
-    </a>
-
-    <a href="chat.html">
-        <span class="nav-icon">💬</span>
-        Chats
-    </a>
-
-    <a href="stream.html">
-        <span class="nav-icon">📺</span>
-        Stream
-    </a>
-
-    <a href="data.html">
-        <span class="nav-icon">📡</span>
-        Data
-    </a>
-
-    <a href="profile.html">
-        <span class="nav-icon">👤</span>
-        Profile
-    </a>
+<!-- FLOATING MENU -->
+<div class="menu-bar">
+  <a href="home.html" class="active">
+    <i class="fa-solid fa-house"></i>
+  </a>
+  <a href="stream.html">
+    <i class="fa-solid fa-video"></i>
+  </a>
+  <a href="data.html">
+    <i class="fa-solid fa-sim-card"></i>
+  </a>
+  <a href="chat.html">
+    <i class="fa-solid fa-comments"></i>
+  </a>
+  <a href="profile.html">
+    <i class="fa-solid fa-user"></i>
+  </a>
 </div>
-    <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+
 import { getAuth, onAuthStateChanged, signOut } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
+  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
   projectId: "qwen-911",
   storageBucket: "qwen-911.firebasestorage.app",
   messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:9972dd63d8dca7936ea88c",
-  measurementId: "G-0LZW0FZ3Q0"
+  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-onAuthStateChanged(auth, user => {
-  if (!user) {
-    window.location.href = "index.html";
-  } else {
-    document.getElementById("user").innerText =
-      "Welcome, " + user.email;
+onAuthStateChanged(auth, (user)=>{
+  if(!user){
+    window.location.href = "login.html";
   }
 });
 
-window.logout = () => {
-  signOut(auth).then(() => {
-    window.location.href = "index.html";
-  });
-};
-    </script>
+document.getElementById("logoutBtn")
+.addEventListener("click", async ()=>{
+  await signOut(auth);
+  window.location.href = "login.html";
+});
+
+</script>
 
 </body>
-    </html>
+  </html>
