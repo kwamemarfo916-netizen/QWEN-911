@@ -58,6 +58,7 @@ body{
   margin-bottom:10px;
 }
 
+/* BUTTON STYLES */
 .signup-btn{
   background:#28a745;
   color:white;
@@ -92,11 +93,13 @@ hr{
   <input type="email" id="email" placeholder="Email">
   <input type="password" id="password" placeholder="Password">
 
+  <!-- SIGN UP BUTTON -->
   <button class="signup-btn" onclick="signup()">Sign Up</button>
+
+  <!-- LOGIN BUTTON -->
   <button class="login-btn" onclick="login()">Login</button>
 
-  <hr>
-
+  <!-- GOOGLE BUTTON (UNDER LOGIN) -->
   <button id="googleLogin" class="google-btn">
     <i class="fa-brands fa-google"></i>
     Continue with Google
@@ -110,10 +113,11 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   sendEmailVerification,
-  GoogleAuthProvider, 
-  signInWithPopup 
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+/* YOUR FIREBASE CONFIG */
 const firebaseConfig = {
 apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain: "qwen-911.firebaseapp.com",
@@ -127,24 +131,21 @@ appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* SIGNUP WITH EMAIL VERIFICATION */
+/* SIGN UP */
 window.signup = async function(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try{
     const userCredential = await createUserWithEmailAndPassword(auth,email,password);
-    
     await sendEmailVerification(userCredential.user);
-
     alert("Account created! Verification email sent. Please check your inbox.");
-    
   }catch(error){
     alert(error.message);
   }
 }
 
-/* LOGIN WITH VERIFICATION CHECK */
+/* LOGIN */
 window.login = async function(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -164,7 +165,7 @@ window.login = async function(){
   }
 }
 
-/* GOOGLE LOGIN (Google emails auto verified) */
+/* GOOGLE LOGIN */
 document.getElementById("googleLogin").addEventListener("click", async ()=>{
   const provider = new GoogleAuthProvider();
   try{
