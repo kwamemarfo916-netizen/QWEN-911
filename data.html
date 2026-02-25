@@ -1,266 +1,267 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>QWEN-911 Data Bundles</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{
-margin:0;
-font-family:Arial, sans-serif;
-background:#0e1621;
-color:white;
-padding:15px;
-}
+  <title>QWEN-911 Data Bundles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-/* Wallet */
-.wallet{
-background:#17212b;
-padding:15px;
-border-radius:12px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
-}
+  <!-- Icons -->
+  <link rel="stylesheet"
+   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-.topup-btn{
-background:aquamarine;
-border:none;
-padding:6px 12px;
-border-radius:6px;
-cursor:pointer;
-}
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:linear-gradient(135deg,#001f3f,#3a0ca3);
+      color:white;
+      padding-bottom:100px;
+    }
 
-/* Cards */
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-margin:15px 0;
-}
+    .container{
+      padding:20px;
+    }
 
-.card{
-background:#17212b;
-padding:15px;
-border-radius:10px;
-text-align:center;
-cursor:pointer;
-border:2px solid transparent;
-}
+    h2{
+      text-align:center;
+      margin-bottom:15px;
+    }
 
-.card.active{
-border:2px solid aquamarine;
-}
+    .wallet-box{
+      background:rgba(255,255,255,0.1);
+      padding:15px;
+      border-radius:15px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
 
-/* Inputs */
-input{
-width:100%;
-padding:10px;
-border-radius:8px;
-border:none;
-margin-bottom:10px;
-}
+    .wallet-box span{
+      font-size:18px;
+      font-weight:bold;
+      color:#00f5ff;
+    }
 
-button.buy{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-background:aquamarine;
-font-weight:bold;
-cursor:pointer;
-}
+    select, input{
+      width:100%;
+      padding:12px;
+      border:none;
+      border-radius:12px;
+      margin-bottom:15px;
+      font-size:15px;
+    }
 
-/* Receipt Popup */
-.overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,.7);
-display:none;
-justify-content:center;
-align-items:center;
-}
+    .bundle-card{
+      background:rgba(255,255,255,0.1);
+      padding:15px;
+      border-radius:15px;
+      margin-bottom:15px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
 
-.receipt{
-background:#17212b;
-padding:20px;
-border-radius:15px;
-width:80%;
-max-width:350px;
-animation:slideUp .3s ease;
-}
+    .buy-btn{
+      padding:8px 15px;
+      border:none;
+      border-radius:20px;
+      background:#00f5ff;
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+    }
 
-@keyframes slideUp{
-from{transform:translateY(50px);opacity:0;}
-to{transform:translateY(0);opacity:1;}
-}
-</style>
+    /* Receipt Animation */
+    .receipt{
+      position:fixed;
+      top:20px;
+      left:50%;
+      transform:translateX(-50%) scale(0);
+      background:#00c853;
+      padding:15px 25px;
+      border-radius:25px;
+      font-weight:bold;
+      transition:0.4s ease;
+      z-index:1000;
+    }
+
+    .receipt.show{
+      transform:translateX(-50%) scale(1);
+    }
+
+    /* Floating Menu */
+    .menu-bar{
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      width:90%;
+      max-width:420px;
+      background:rgba(0,0,0,0.7);
+      backdrop-filter:blur(20px);
+      border-radius:30px;
+      display:flex;
+      justify-content:space-around;
+      padding:12px 5px;
+      box-shadow:0 5px 25px rgba(0,0,0,0.4);
+    }
+
+    .menu-bar a{
+      text-decoration:none;
+      color:#ccc;
+      font-size:20px;
+      text-align:center;
+      flex:1;
+      transition:0.3s;
+    }
+
+    .menu-bar a.active{
+      color:#00f5ff;
+      transform:translateY(-5px);
+    }
+
+  </style>
 </head>
 <body>
 
-<h2>💰 Wallet</h2>
-<div class="wallet">
-<span id="balance">Loading...</span>
-<button class="topup-btn" id="topupBtn">Top Up</button>
+<div class="receipt" id="receipt">
+  ✅ Purchase Successful
 </div>
 
-<h2>📡 Select Network</h2>
-<div class="grid" id="networks">
-<div class="card" data-network="MTN">MTN</div>
-<div class="card" data-network="Vodafone">Vodafone</div>
-<div class="card" data-network="AirtelTigo">AirtelTigo</div>
-<div class="card" data-network="Glo">Glo</div>
+<div class="container">
+  <h2>Buy Data Bundles</h2>
+
+  <div class="wallet-box">
+    <div>Wallet Balance</div>
+    <span id="walletBalance">GH₵ 0.00</span>
+  </div>
+
+  <select id="network">
+    <option value="">Select Network</option>
+    <option value="MTN">MTN</option>
+    <option value="Telecel">Telecel</option>
+    <option value="AirtelTigo">AirtelTigo</option>
+  </select>
+
+  <input type="text" id="phone" placeholder="Enter Phone Number">
+
+  <div id="bundleList"></div>
 </div>
 
-<h2>📦 Select Bundle</h2>
-<div class="grid" id="bundles">
-<div class="card" data-amount="5">1GB - GHS 5</div>
-<div class="card" data-amount="10">2GB - GHS 10</div>
-<div class="card" data-amount="20">5GB - GHS 20</div>
-<div class="card" data-amount="40">10GB - GHS 40</div>
-</div>
-
-<input id="phone" placeholder="Enter phone number">
-<button class="buy" id="buyBtn">Buy Data</button>
-
-<!-- Receipt -->
-<div class="overlay" id="receiptOverlay">
-<div class="receipt" id="receiptBox">
-<h3>✅ Purchase Successful</h3>
-<p id="receiptDetails"></p>
-<button onclick="closeReceipt()" class="buy">Done</button>
-</div>
+<!-- Floating Menu -->
+<div class="menu-bar">
+  <a href="home.html">
+    <i class="fa-solid fa-house"></i>
+  </a>
+  <a href="stream.html">
+    <i class="fa-solid fa-video"></i>
+  </a>
+  <a href="data.html" class="active">
+    <i class="fa-solid fa-sim-card"></i>
+  </a>
+  <a href="chat.html">
+    <i class="fa-solid fa-comments"></i>
+  </a>
+  <a href="profile.html">
+    <i class="fa-solid fa-user"></i>
+  </a>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, push, update } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* FIREBASE CONFIG */
+import { initializeApp } from 
+"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+
+import { getAuth, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+import { getDatabase, ref, get, update } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
 const firebaseConfig = {
-apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-authDomain: "qwen-911.firebaseapp.com",
-databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
-projectId: "qwen-911",
-storageBucket: "qwen-911.firebasestorage.app",
-messagingSenderId: "518019892837",
-appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+  apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+  authDomain: "qwen-911.firebaseapp.com",
+  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+  projectId: "qwen-911",
+  storageBucket: "qwen-911.firebasestorage.app",
+  messagingSenderId: "518019892837",
+  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
-const auth = getAuth();
 
-const balanceEl = document.getElementById("balance");
-let userId=null;
-let balance=0;
+const bundles = [
+  {size:"1GB", price:10},
+  {size:"2GB", price:18},
+  {size:"5GB", price:40},
+  {size:"10GB", price:75}
+];
 
-/* AUTH STATE */
-onAuthStateChanged(auth, async user=>{
-    if(user){
-        userId=user.uid;
-        await loadWallet();
-    }else{
-        window.location.href="login.html"; // redirect if not logged in
-    }
+const bundleList = document.getElementById("bundleList");
+const walletDisplay = document.getElementById("walletBalance");
+const receipt = document.getElementById("receipt");
+
+let currentUser;
+
+onAuthStateChanged(auth, async(user)=>{
+  if(!user){
+    window.location.href="login.html";
+  }else{
+    currentUser=user;
+    const snapshot = await get(ref(db,"users/"+user.uid+"/wallet"));
+    const balance = snapshot.exists() ? snapshot.val() : 0;
+    walletDisplay.innerText="GH₵ "+balance.toFixed(2);
+  }
 });
 
-/* Load Wallet */
-async function loadWallet(){
-    const snap = await get(ref(db,"users/"+userId+"/balance"));
-    if(snap.exists()){
-        balance = snap.val();
-    }else{
-        balance = 100; // initial balance
-        await set(ref(db,"users/"+userId),{balance:100});
-    }
-    balanceEl.textContent = "GHS " + balance.toFixed(2);
-}
-
-/* Selection Logic */
-let selectedNetwork=null;
-let selectedAmount=null;
-
-document.querySelectorAll("#networks .card").forEach(card=>{
-card.onclick=()=>{
-document.querySelectorAll("#networks .card").forEach(c=>c.classList.remove("active"));
-card.classList.add("active");
-selectedNetwork=card.dataset.network;
-};
+bundles.forEach(bundle=>{
+  const div=document.createElement("div");
+  div.className="bundle-card";
+  div.innerHTML=`
+    <div>
+      <strong>${bundle.size}</strong><br>
+      GH₵ ${bundle.price}
+    </div>
+    <button class="buy-btn">Buy</button>
+  `;
+  div.querySelector("button").onclick=()=>buyBundle(bundle);
+  bundleList.appendChild(div);
 });
 
-document.querySelectorAll("#bundles .card").forEach(card=>{
-card.onclick=()=>{
-document.querySelectorAll("#bundles .card").forEach(c=>c.classList.remove("active"));
-card.classList.add("active");
-selectedAmount=Number(card.dataset.amount);
-};
-});
+async function buyBundle(bundle){
+  const phone=document.getElementById("phone").value;
+  const network=document.getElementById("network").value;
 
-/* Buy Data */
-document.getElementById("buyBtn").onclick=async ()=>{
-    const phone=document.getElementById("phone").value;
-    if(!selectedNetwork||!selectedAmount||!phone){
-        alert("Complete all fields");
-        return;
-    }
-    if(balance<selectedAmount){
-        alert("Insufficient balance");
-        return;
-    }
+  if(!phone || !network){
+    alert("Enter phone & network");
+    return;
+  }
 
-    balance -= selectedAmount;
-    await update(ref(db,"users/"+userId),{balance});
-    balanceEl.textContent = "GHS "+balance.toFixed(2);
+  const walletRef=ref(db,"users/"+currentUser.uid+"/wallet");
+  const snap=await get(walletRef);
+  let balance=snap.val()||0;
 
-    const transactionId="TX"+Date.now();
+  if(balance<bundle.price){
+    alert("Insufficient balance");
+    return;
+  }
 
-    await push(ref(db,"transactions/"+userId),{
-        network:selectedNetwork,
-        amount:selectedAmount,
-        phone,
-        transactionId,
-        date:new Date().toLocaleString()
-    });
+  balance-=bundle.price;
+  await update(ref(db,"users/"+currentUser.uid),{
+    wallet:balance
+  });
 
-    showReceipt(selectedNetwork,selectedAmount,phone,transactionId);
-};
+  walletDisplay.innerText="GH₵ "+balance.toFixed(2);
 
-/* Top-Up Wallet */
-document.getElementById("topupBtn").onclick=async ()=>{
-    const amount=prompt("Enter top up amount:");
-    if(!amount||isNaN(amount)) return;
-    balance += Number(amount);
-    await update(ref(db,"users/"+userId),{balance});
-    balanceEl.textContent="GHS "+balance.toFixed(2);
+  receipt.classList.add("show");
+  setTimeout(()=>receipt.classList.remove("show"),3000);
 
-    await push(ref(db,"topups/"+userId),{
-        amount:Number(amount),
-        date:new Date().toLocaleString()
-    });
-
-    alert("Wallet funded successfully!");
-};
-
-/* Receipt */
-function showReceipt(network,amount,phone,tx){
-    document.getElementById("receiptDetails").innerHTML=
-    `Network: ${network}<br>
-     Amount: GHS ${amount}<br>
-     Phone: ${phone}<br>
-     Transaction ID: ${tx}`;
-    document.getElementById("receiptOverlay").style.display="flex";
+  // Here is where real telecom API will be integrated
 }
 
-window.closeReceipt=function(){
-    document.getElementById("receiptOverlay").style.display="none";
-}
 </script>
 
 </body>
-  </html>
+</html>
