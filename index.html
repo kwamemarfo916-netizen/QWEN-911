@@ -62,18 +62,6 @@
       gap:10px;
     }
 
-    #resendBtn{
-      display:none;
-      background:#ff9800;
-      color:white;
-    }
-
-    #message{
-      margin-top:10px;
-      color:#ffcc00;
-      font-size:14px;
-    }
-
   </style>
 </head>
 <body>
@@ -86,12 +74,6 @@
 
   <button class="login-btn" id="loginBtn">
     Login
-  </button>
-
-  <div id="message"></div>
-
-  <button id="resendBtn">
-    Resend Verification Email
   </button>
 
   <button class="google-btn" id="googleLogin">
@@ -108,8 +90,7 @@ from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
 import { 
   getAuth, 
-  signInWithEmailAndPassword, 
-  sendEmailVerification,
+  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -127,48 +108,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-const loginBtn = document.getElementById("loginBtn");
-const resendBtn = document.getElementById("resendBtn");
-const messageBox = document.getElementById("message");
-
-let currentUser;
-
 /* EMAIL LOGIN */
-loginBtn.addEventListener("click", async () => {
+document.getElementById("loginBtn")
+.addEventListener("click", async () => {
 
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
-
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    await userCredential.user.reload();
-
-    currentUser = userCredential.user;
-
-    if (!currentUser.emailVerified) {
-
-      messageBox.innerHTML = "⚠️ Please verify your email.";
-      resendBtn.style.display = "block";
-      return;
-    }
-
+    await signInWithEmailAndPassword(auth, email, password);
     window.location.href = "home.html";
-
-  } catch (error) {
-    alert(error.message);
-  }
-
-});
-
-/* RESEND VERIFICATION */
-resendBtn.addEventListener("click", async () => {
-
-  if (!currentUser) return;
-
-  try {
-    await sendEmailVerification(currentUser);
-    alert("Verification link sent again. Check your inbox.");
   } catch (error) {
     alert(error.message);
   }
