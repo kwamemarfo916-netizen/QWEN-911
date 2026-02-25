@@ -1,49 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - QWEN-911</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b0f1a;
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
 }
 
-.login-box {
-  background: #11162a;
-  padding: 40px;
-  border-radius: 20px;
-  width: 320px;
-  text-align: center;
+body{
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
 }
 
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border: none;
-  border-radius: 10px;
-  background: #1a2040;
-  color: white;
+.login-box{
+  width:90%;
+  max-width:400px;
+  background:rgba(0,0,0,0.6);
+  padding:30px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  color:white;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  cursor: pointer;
+.login-box h2{
+  text-align:center;
+  margin-bottom:20px;
+}
+
+.login-box input{
+  width:100%;
+  padding:12px;
+  margin-bottom:12px;
+  border:none;
+  border-radius:25px;
+  outline:none;
+}
+
+.login-box button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:25px;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:10px;
+}
+
+.signup-btn{
+  background:#28a745;
+  color:white;
+}
+
+.login-btn{
+  background:#00c6ff;
+  color:white;
+}
+
+.google-btn{
+  background:white;
+  color:#333;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+hr{
+  margin:20px 0;
+  opacity:.3;
 }
 </style>
 </head>
@@ -53,55 +89,91 @@ button {
 <div class="login-box">
   <h2>QWEN-911</h2>
 
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
 
-  <button id="signup">Sign Up</button>
-  <button id="login">Login</button>
+  <button class="signup-btn" onclick="signup()">Sign Up</button>
+  <button class="login-btn" onclick="login()">Login</button>
+
+  <hr>
+
+  <button id="googleLogin" class="google-btn">
+    <i class="fa-brands fa-google"></i>
+    Continue with Google
+  </button>
 </div>
 
-<!-- Firebase script goes here -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  GoogleAuthProvider, 
+  signInWithPopup 
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-  authDomain: "qwen-911.firebaseapp.com",
-  projectId: "qwen-911",
-  storageBucket: "qwen-911.firebasestorage.app",
-  messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:d9a2c862a416c1176ea88c"
+apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+authDomain: "qwen-911.firebaseapp.com",
+databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+projectId: "qwen-911",
+storageBucket: "qwen-911.firebasestorage.app",
+messagingSenderId: "518019892837",
+appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Sign up
-document.getElementById("signup").onclick = () => {
+/* SIGNUP WITH EMAIL VERIFICATION */
+window.signup = async function(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  createUserWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      alert("Account created!");
-      window.location.href = "home.html";
-    })
-    .catch(e => alert(e.message));
-};
+  try{
+    const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+    
+    await sendEmailVerification(userCredential.user);
 
-// Login
-document.getElementById("login").onclick = () => {
+    alert("Account created! Verification email sent. Please check your inbox.");
+    
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+/* LOGIN WITH VERIFICATION CHECK */
+window.login = async function(){
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  signInWithEmailAndPassword(auth, email, password)
-    .then(() => {
-      window.location.href = "home.html";
-    })
-    .catch(e => alert(e.message));
-};
+  try{
+    const userCredential = await signInWithEmailAndPassword(auth,email,password);
+
+    if(!userCredential.user.emailVerified){
+      alert("Please verify your email before logging in.");
+      return;
+    }
+
+    window.location.href="home.html";
+
+  }catch(error){
+    alert(error.message);
+  }
+}
+
+/* GOOGLE LOGIN (Google emails auto verified) */
+document.getElementById("googleLogin").addEventListener("click", async ()=>{
+  const provider = new GoogleAuthProvider();
+  try{
+    await signInWithPopup(auth,provider);
+    window.location.href="home.html";
+  }catch(error){
+    alert(error.message);
+  }
+});
 </script>
 
 </body>
