@@ -1,144 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>QWEN-911 Login</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - QWEN-911</title>
 
-  <link rel="stylesheet"
-   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b0f1a;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-  <style>
-    body{
-      margin:0;
-      font-family:Arial;
-      background:linear-gradient(135deg,#001f3f,#3a0ca3);
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      color:white;
-    }
+.login-box {
+  background: #11162a;
+  padding: 40px;
+  border-radius: 20px;
+  width: 320px;
+  text-align: center;
+}
 
-    .card{
-      width:90%;
-      max-width:350px;
-      background:rgba(255,255,255,0.1);
-      padding:25px;
-      border-radius:20px;
-      backdrop-filter:blur(15px);
-      text-align:center;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background: #1a2040;
+  color: white;
+}
 
-    input{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border:none;
-      border-radius:25px;
-      outline:none;
-    }
-
-    button{
-      width:100%;
-      padding:12px;
-      margin-top:15px;
-      border:none;
-      border-radius:25px;
-      font-weight:bold;
-      cursor:pointer;
-    }
-
-    .login-btn{
-      background:#00f5ff;
-      color:black;
-    }
-
-    .google-btn{
-      background:white;
-      color:black;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-    }
-
-  </style>
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  cursor: pointer;
+}
+</style>
 </head>
+
 <body>
 
-<div class="card">
+<div class="login-box">
   <h2>QWEN-911</h2>
 
-  <input type="email" id="email" placeholder="Email">
-  <input type="password" id="password" placeholder="Password">
+  <input id="email" type="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
 
-  <button class="login-btn" id="loginBtn">
-    Login
-  </button>
-
-  <button class="google-btn" id="googleLogin">
-    <i class="fa-brands fa-google"></i>
-    Continue with Google
-  </button>
-
+  <button id="signup">Sign Up</button>
+  <button id="login">Login</button>
 </div>
 
+<!-- Firebase script goes here -->
 <script type="module">
-
-import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-
-import { 
-  getAuth, 
-  signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
-  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
   projectId: "qwen-911",
   storageBucket: "qwen-911.firebasestorage.app",
   messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+  appId: "1:518019892837:web:d9a2c862a416c1176ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-/* EMAIL LOGIN */
-document.getElementById("loginBtn")
-.addEventListener("click", async () => {
-
+// Sign up
+document.getElementById("signup").onclick = () => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "home.html";
-  } catch (error) {
-    alert(error.message);
-  }
+  createUserWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      alert("Account created!");
+      window.location.href = "home.html";
+    })
+    .catch(e => alert(e.message));
+};
 
-});
+// Login
+document.getElementById("login").onclick = () => {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-/* GOOGLE LOGIN */
-document.getElementById("googleLogin")
-.addEventListener("click", async () => {
-
-  const provider = new GoogleAuthProvider();
-
-  try {
-    await signInWithPopup(auth, provider);
-    window.location.href = "home.html";
-  } catch (error) {
-    alert(error.message);
-  }
-
-});
-
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      window.location.href = "home.html";
+    })
+    .catch(e => alert(e.message));
+};
 </script>
 
 </body>
