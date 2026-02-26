@@ -1,47 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QWEN-911 Home</title>
+  <title>QWEN-911</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Icons -->
+  <!-- Font Awesome -->
   <link rel="stylesheet"
-   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     body{
       margin:0;
       font-family:Arial, sans-serif;
-      background:linear-gradient(-45deg,#001f3f,#3a0ca3,#00b4d8);
-      background-size:400% 400%;
-      animation: gradientMove 8s ease infinite;
+      background:black;
       color:white;
-      padding-bottom:90px;
+      padding-bottom:100px;
     }
 
-    @keyframes gradientMove{
-      0%{background-position:0% 50%}
-      50%{background-position:100% 50%}
-      100%{background-position:0% 50%}
+    h1{
+      text-align:center;
+      margin-top:20px;
+      font-size:28px;
+      background:linear-gradient(90deg,#00f5ff,#a855f7);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
     }
 
     .container{
       padding:20px;
     }
 
-    h1{
-      text-align:center;
-    }
-
+    /* NEON CARD DESIGN */
     .card{
-      background:rgba(255,255,255,0.1);
-      padding:15px;
-      border-radius:15px;
-      margin-top:15px;
-      backdrop-filter:blur(10px);
+      background:rgba(20,20,20,0.9);
+      border-radius:20px;
+      padding:20px;
+      margin-bottom:20px;
+      border:1px solid #222;
+      box-shadow:
+        0 0 15px #00f5ff,
+        0 0 25px #a855f7 inset;
+      transition:0.3s;
     }
 
-    /* FLOATING MENU */
+    .card:hover{
+      transform:scale(1.03);
+      box-shadow:
+        0 0 25px #00f5ff,
+        0 0 40px #a855f7 inset;
+    }
+
+    .card h3{
+      margin-top:0;
+      color:#00f5ff;
+    }
+
+    .card p{
+      color:#ccc;
+    }
+
+    .card button{
+      margin-top:10px;
+      padding:10px 15px;
+      border:none;
+      border-radius:20px;
+      background:linear-gradient(90deg,#00f5ff,#a855f7);
+      color:black;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    /* FLOATING NEON MENU */
     .menu-bar{
       position:fixed;
       bottom:20px;
@@ -49,70 +78,63 @@
       transform:translateX(-50%);
       width:90%;
       max-width:420px;
-      background:rgba(0,0,0,0.7);
-      backdrop-filter:blur(20px);
+      background:rgba(15,15,15,0.9);
       border-radius:30px;
       display:flex;
       justify-content:space-around;
       padding:12px 5px;
-      box-shadow:0 5px 25px rgba(0,0,0,0.4);
+      box-shadow:
+        0 0 15px #00f5ff,
+        0 0 30px #a855f7;
+      backdrop-filter:blur(20px);
     }
 
     .menu-bar a{
       text-decoration:none;
-      color:#ccc;
-      font-size:20px;
-      text-align:center;
+      color:#888;
+      font-size:22px;
       flex:1;
+      text-align:center;
       transition:0.3s;
     }
 
     .menu-bar a.active{
       color:#00f5ff;
       transform:translateY(-5px);
+      text-shadow:0 0 10px #00f5ff;
     }
 
     .menu-bar a:hover{
-      color:white;
-    }
-
-    .logout-btn{
-      margin-top:20px;
-      width:100%;
-      padding:10px;
-      border:none;
-      border-radius:20px;
-      background:#ff4d4d;
-      color:white;
-      font-weight:bold;
-      cursor:pointer;
+      color:#a855f7;
+      text-shadow:0 0 10px #a855f7;
     }
 
   </style>
 </head>
 <body>
 
+<h1>QWEN-911</h1>
+
 <div class="container">
-  <h1>Welcome to QWEN-911</h1>
 
   <div class="card">
-    <h3>Live Chat</h3>
-    <p>Connect with users in real-time.</p>
+    <h3><i class="fa-solid fa-comments"></i> Live Chat</h3>
+    <p>Chat with users in real time with typing indicator & delivery ticks.</p>
+    <button onclick="location.href='chat.html'">Open Chat</button>
   </div>
 
   <div class="card">
-    <h3>Data Bundles</h3>
-    <p>Buy telecom bundles instantly.</p>
+    <h3><i class="fa-solid fa-sim-card"></i> Data Bundles</h3>
+    <p>Buy MTN, Telecel & AT bundles instantly.</p>
+    <button onclick="location.href='data.html'">Buy Data</button>
   </div>
 
   <div class="card">
-    <h3>Streaming</h3>
-    <p>Watch live streams and media.</p>
+    <h3><i class="fa-solid fa-video"></i> Streaming</h3>
+    <p>Watch live streams & media content.</p>
+    <button onclick="location.href='stream.html'">Watch Now</button>
   </div>
 
-  <button id="logoutBtn" class="logout-btn">
-    Logout
-  </button>
 </div>
 
 <!-- FLOATING MENU -->
@@ -133,43 +155,29 @@
     <i class="fa-solid fa-user"></i>
   </a>
 </div>
-  <a href="privacy.html">privacy and policy</a>
 
-<!-- FIREBASE -->
 <script type="module">
-
 import { initializeApp } from 
 "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
-import { getAuth, onAuthStateChanged, signOut } 
+import { getAuth, onAuthStateChanged } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
-  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
   projectId: "qwen-911",
-  storageBucket: "qwen-911.firebasestorage.app",
-  messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-onAuthStateChanged(auth, (user)=>{
-  {
-    window.location.href = "login.html";
+onAuthStateChanged(auth,(user)=>{
+  if(!user){
+    window.location.href="login.html";
   }
 });
-
-document.getElementById("logoutBtn")
-.addEventListener("click", async ()=>{
-  await signOut(auth);
-  window.location.href = "login.html";
-});
-
 </script>
 
 </body>
-  </html>
+      </html>
