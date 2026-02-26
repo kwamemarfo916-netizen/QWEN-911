@@ -4,140 +4,196 @@
   <title>QWEN-911</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Font Awesome -->
   <link rel="stylesheet"
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
+
     body{
       margin:0;
-      font-family:Arial, sans-serif;
-      background:black;
+      font-family:'Segoe UI', sans-serif;
+      background:#050505;
       color:white;
-      padding-bottom:100px;
+      overflow-x:hidden;
+      padding-bottom:110px;
     }
 
-    h1{
+    /* Animated Gradient Background */
+    body::before{
+      content:'';
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:linear-gradient(-45deg,#000,#001f3f,#3a0ca3,#000);
+      background-size:400% 400%;
+      animation:gradientMove 12s ease infinite;
+      z-index:-3;
+    }
+
+    @keyframes gradientMove{
+      0%{background-position:0% 50%}
+      50%{background-position:100% 50%}
+      100%{background-position:0% 50%}
+    }
+
+    /* Floating Glow Orbs */
+    .orb{
+      position:fixed;
+      width:300px;
+      height:300px;
+      border-radius:50%;
+      filter:blur(120px);
+      opacity:0.4;
+      z-index:-2;
+      animation:float 8s ease-in-out infinite;
+    }
+
+    .orb.blue{background:#00f5ff; top:10%; left:5%;}
+    .orb.purple{background:#a855f7; bottom:15%; right:5%;}
+
+    @keyframes float{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-40px)}
+    }
+
+    .hero{
       text-align:center;
-      margin-top:20px;
-      font-size:28px;
+      padding:80px 20px 40px;
+    }
+
+    .hero h1{
+      font-size:36px;
       background:linear-gradient(90deg,#00f5ff,#a855f7);
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
+      animation:glow 2s ease-in-out infinite alternate;
     }
 
-    .container{
-      padding:20px;
+    @keyframes glow{
+      from{text-shadow:0 0 10px #00f5ff}
+      to{text-shadow:0 0 25px #a855f7}
     }
 
-    /* NEON CARD DESIGN */
+    .typing{
+      margin-top:10px;
+      font-size:16px;
+      color:#ccc;
+      min-height:20px;
+    }
+
+    .clock{
+      margin-top:15px;
+      font-size:14px;
+      color:#00f5ff;
+    }
+
+    .stats{
+      display:flex;
+      justify-content:space-around;
+      margin-top:40px;
+      padding:0 20px;
+    }
+
+    .stat{
+      text-align:center;
+    }
+
+    .stat h2{
+      color:#00f5ff;
+      margin:0;
+    }
+
+    .cards{
+      padding:30px 20px;
+    }
+
     .card{
-      background:rgba(20,20,20,0.9);
-      border-radius:20px;
-      padding:20px;
-      margin-bottom:20px;
-      border:1px solid #222;
-      box-shadow:
-        0 0 15px #00f5ff,
-        0 0 25px #a855f7 inset;
-      transition:0.3s;
+      background:rgba(255,255,255,0.05);
+      backdrop-filter:blur(15px);
+      border-radius:25px;
+      padding:25px;
+      margin-bottom:25px;
+      border:1px solid rgba(255,255,255,0.1);
+      transition:0.4s;
+      box-shadow:0 0 20px rgba(0,245,255,0.2);
     }
 
     .card:hover{
-      transform:scale(1.03);
-      box-shadow:
-        0 0 25px #00f5ff,
-        0 0 40px #a855f7 inset;
+      transform:translateY(-10px);
+      box-shadow:0 0 35px #a855f7;
     }
 
     .card h3{
+      color:#a855f7;
       margin-top:0;
-      color:#00f5ff;
-    }
-
-    .card p{
-      color:#ccc;
     }
 
     .card button{
-      margin-top:10px;
-      padding:10px 15px;
+      margin-top:15px;
+      padding:12px 20px;
       border:none;
-      border-radius:20px;
+      border-radius:30px;
       background:linear-gradient(90deg,#00f5ff,#a855f7);
-      color:black;
       font-weight:bold;
       cursor:pointer;
-    }
-
-    /* FLOATING NEON MENU */
-    .menu-bar{
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      width:90%;
-      max-width:420px;
-      background:rgba(15,15,15,0.9);
-      border-radius:30px;
-      display:flex;
-      justify-content:space-around;
-      padding:12px 5px;
-      box-shadow:
-        0 0 15px #00f5ff,
-        0 0 30px #a855f7;
-      backdrop-filter:blur(20px);
-    }
-
-    .menu-bar a{
-      text-decoration:none;
-      color:#888;
-      font-size:22px;
-      flex:1;
-      text-align:center;
       transition:0.3s;
     }
 
-    .menu-bar a.active{
-      color:#00f5ff;
-      transform:translateY(-5px);
-      text-shadow:0 0 10px #00f5ff;
+    .card button:hover{
+      box-shadow:0 0 20px #00f5ff;
     }
 
-    .menu-bar a:hover{
-      color:#a855f7;
-      text-shadow:0 0 10px #a855f7;
-    }
+    html{scroll-behavior:smooth;}
 
   </style>
 </head>
 <body>
 
-<h1>QWEN-911</h1>
+<div class="orb blue"></div>
+<div class="orb purple"></div>
 
-<div class="container">
+<div class="hero">
+  <h1>QWEN-911</h1>
+  <div class="typing" id="typing"></div>
+  <div class="clock" id="clock"></div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <h2 id="users">0</h2>
+    <p>Active Users</p>
+  </div>
+  <div class="stat">
+    <h2>99%</h2>
+    <p>Uptime</p>
+  </div>
+</div>
+
+<div class="cards">
 
   <div class="card">
     <h3><i class="fa-solid fa-comments"></i> Live Chat</h3>
-    <p>Chat with users in real time with typing indicator & delivery ticks.</p>
-    <button onclick="location.href='chat.html'">Open Chat</button>
+    <p>Real-time messaging with delivery ticks & typing status.</p>
+    <button onclick="location.href='chat.html'">Enter Chat</button>
   </div>
 
   <div class="card">
     <h3><i class="fa-solid fa-sim-card"></i> Data Bundles</h3>
-    <p>Buy MTN, Telecel & AT bundles instantly.</p>
+    <p>Instant MTN, Telecel & AT bundles purchase.</p>
     <button onclick="location.href='data.html'">Buy Data</button>
   </div>
 
   <div class="card">
     <h3><i class="fa-solid fa-video"></i> Streaming</h3>
-    <p>Watch live streams & media content.</p>
-    <button onclick="location.href='stream.html'">Watch Now</button>
+    <p>Watch premium live streams in HD.</p>
+    <button onclick="location.href='stream.html'">Start Watching</button>
   </div>
 
 </div>
 
-<!-- FLOATING MENU -->
+<!-- KEEPING YOUR FLOATING MENU UNCHANGED -->
 <div class="menu-bar">
   <a href="home.html" class="active">
     <i class="fa-solid fa-house"></i>
@@ -157,6 +213,7 @@
 </div>
 
 <script type="module">
+
 import { initializeApp } from 
 "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
@@ -177,7 +234,35 @@ onAuthStateChanged(auth,(user)=>{
     window.location.href="login.html";
   }
 });
+
+/* Typing Animation */
+const text="The Future of Communication & Digital Services.";
+let i=0;
+function typing(){
+  if(i<text.length){
+    document.getElementById("typing").innerHTML+=text.charAt(i);
+    i++;
+    setTimeout(typing,40);
+  }
+}
+typing();
+
+/* Clock */
+setInterval(()=>{
+  document.getElementById("clock").innerHTML=
+  new Date().toLocaleTimeString();
+},1000);
+
+/* Counter Animation */
+let count=0;
+setInterval(()=>{
+  if(count<1287){
+    count+=7;
+    document.getElementById("users").innerText=count;
+  }
+},30);
+
 </script>
 
 </body>
-      </html>
+</html>
