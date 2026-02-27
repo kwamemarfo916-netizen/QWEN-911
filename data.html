@@ -1,267 +1,393 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>QWEN-911 Data Bundles</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-  <!-- Icons -->
-  <link rel="stylesheet"
-   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<title>QWEN-911 Telecom</title>
 
-  <style>
-    body{
-      margin:0;
-      font-family:Arial, sans-serif;
-      background:linear-gradient(135deg,#001f3f,#3a0ca3);
-      color:white;
-      padding-bottom:100px;
-    }
+<!-- Icons (SAME AS HOME MENU) -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    .container{
-      padding:20px;
-    }
+<style>
 
-    h2{
-      text-align:center;
-      margin-bottom:15px;
-    }
+/* ===============================
+   GLOBAL FUTURISTIC STYLE
+================================*/
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:black;
+color:white;
+overflow-x:hidden;
+}
 
-    .wallet-box{
-      background:rgba(255,255,255,0.1);
-      padding:15px;
-      border-radius:15px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:20px;
-    }
+/* Animated Background */
+body::before{
+content:"";
+position:fixed;
+width:200%;
+height:200%;
+background:
+radial-gradient(circle,#00eaff22,transparent),
+radial-gradient(circle,#7b2fff22,transparent);
+animation:bgMove 18s linear infinite;
+z-index:-1;
+}
 
-    .wallet-box span{
-      font-size:18px;
-      font-weight:bold;
-      color:#00f5ff;
-    }
+@keyframes bgMove{
+0%{transform:translate(0,0)}
+50%{transform:translate(-20%,-20%)}
+100%{transform:translate(0,0)}
+}
 
-    select, input{
-      width:100%;
-      padding:12px;
-      border:none;
-      border-radius:12px;
-      margin-bottom:15px;
-      font-size:15px;
-    }
+/* ===============================
+HEADER DASHBOARD
+================================*/
+.header{
+padding:18px;
+text-align:center;
+background:linear-gradient(90deg,#00eaff,#7b2fff);
+font-weight:bold;
+font-size:20px;
+}
 
-    .bundle-card{
-      background:rgba(255,255,255,0.1);
-      padding:15px;
-      border-radius:15px;
-      margin-bottom:15px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
+.stats{
+display:flex;
+justify-content:space-around;
+padding:10px;
+font-size:13px;
+opacity:.9;
+}
 
-    .buy-btn{
-      padding:8px 15px;
-      border:none;
-      border-radius:20px;
-      background:#00f5ff;
-      color:black;
-      font-weight:bold;
-      cursor:pointer;
-    }
+/* ===============================
+CARDS
+================================*/
+.card{
+margin:14px;
+padding:18px;
+border-radius:16px;
+background:rgba(255,255,255,0.06);
+backdrop-filter:blur(14px);
+box-shadow:0 0 20px #00eaff33;
+}
 
-    /* Receipt Animation */
-    .receipt{
-      position:fixed;
-      top:20px;
-      left:50%;
-      transform:translateX(-50%) scale(0);
-      background:#00c853;
-      padding:15px 25px;
-      border-radius:25px;
-      font-weight:bold;
-      transition:0.4s ease;
-      z-index:1000;
-    }
+input,select{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:#111;
+color:white;
+}
 
-    .receipt.show{
-      transform:translateX(-50%) scale(1);
-    }
+button{
+width:100%;
+padding:13px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+background:linear-gradient(90deg,#00eaff,#7b2fff);
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
 
-    /* Floating Menu */
-    .menu-bar{
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      width:90%;
-      max-width:420px;
-      background:rgba(0,0,0,0.7);
-      backdrop-filter:blur(20px);
-      border-radius:30px;
-      display:flex;
-      justify-content:space-around;
-      padding:12px 5px;
-      box-shadow:0 5px 25px rgba(0,0,0,0.4);
-    }
+/* ===============================
+BUNDLES GRID
+================================*/
+.bundle-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+}
 
-    .menu-bar a{
-      text-decoration:none;
-      color:#ccc;
-      font-size:20px;
-      text-align:center;
-      flex:1;
-      transition:0.3s;
-    }
+.bundle{
+padding:14px;
+border-radius:12px;
+background:#111;
+text-align:center;
+cursor:pointer;
+transition:.3s;
+}
 
-    .menu-bar a.active{
-      color:#00f5ff;
-      transform:translateY(-5px);
-    }
+.bundle:hover{
+transform:scale(1.05);
+box-shadow:0 0 12px #00eaff;
+}
 
-  </style>
+/* ===============================
+TRANSACTIONS
+================================*/
+.tx{
+font-size:12px;
+padding:8px;
+border-bottom:1px solid #333;
+}
+
+/* ===============================
+FLOATING MENU BAR
+================================*/
+.menu{
+position:fixed;
+bottom:12px;
+left:50%;
+transform:translateX(-50%);
+width:92%;
+background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px;
+border-radius:20px;
+box-shadow:0 0 20px #00eaff55;
+}
+
+.menu i{
+color:white;
+font-size:26px;
+cursor:pointer;
+}
+
+.active{
+color:#00eaff;
+}
+
+</style>
 </head>
+
 <body>
 
-<div class="receipt" id="receipt">
-  ✅ Purchase Successful
+<div class="header">QWEN-911 TELECOM</div>
+
+<div class="stats">
+<div id="username">User</div>
+<div id="wallet">₵0</div>
+<div id="online">0 online</div>
 </div>
 
-<div class="container">
-  <h2>Buy Data Bundles</h2>
+<!-- PHONE INPUT -->
+<div class="card">
+<h3>Buy Data Bundle</h3>
 
-  <div class="wallet-box">
-    <div>Wallet Balance</div>
-    <span id="walletBalance">GH₵ 0.00</span>
-  </div>
+<input id="phone" placeholder="Enter Phone Number">
 
-  <select id="network">
-    <option value="">Select Network</option>
-    <option value="MTN">MTN</option>
-    <option value="Telecel">Telecel</option>
-    <option value="AirtelTigo">AirtelTigo</option>
-  </select>
+<select id="network">
+<option>Auto Detect</option>
+<option>MTN</option>
+<option>Vodafone</option>
+<option>AirtelTigo</option>
+</select>
 
-  <input type="text" id="phone" placeholder="Enter Phone Number">
-
-  <div id="bundleList"></div>
 </div>
 
-<!-- Floating Menu -->
-<div class="menu-bar">
-  <a href="home.html">
-    <i class="fa-solid fa-house"></i>
-  </a>
-  <a href="stream.html">
-    <i class="fa-solid fa-video"></i>
-  </a>
-  <a href="data.html" class="active">
-    <i class="fa-solid fa-sim-card"></i>
-  </a>
-  <a href="chat.html">
-    <i class="fa-solid fa-comments"></i>
-  </a>
-  <a href="profile.html">
-    <i class="fa-solid fa-user"></i>
-  </a>
+<!-- BUNDLES -->
+<div class="card">
+<h3>Available Bundles</h3>
+<div class="bundle-grid" id="bundles"></div>
 </div>
+
+<!-- TRANSACTIONS -->
+<div class="card">
+<h3>Transactions</h3>
+<div id="transactions"></div>
+</div>
+
+<!-- FLOATING MENU -->
+<div class="menu">
+<i class="material-icons" onclick="go('home.html')">home</i>
+<i class="material-icons active">wifi</i>
+<i class="material-icons" onclick="go('chat.html')">chat</i>
+<i class="material-icons" onclick="go('profile.html')">person</i>
+</div>
+
+<!-- ===============================
+FIREBASE
+================================-->
 
 <script type="module">
 
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-import { getAuth, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import {
+getAuth,
+onAuthStateChanged
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import { getDatabase, ref, get, update } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import {
+getFirestore,
+doc,
+getDoc,
+setDoc,
+updateDoc,
+collection,
+addDoc,
+onSnapshot
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* YOUR CONFIG */
 const firebaseConfig = {
-  apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-  authDomain: "qwen-911.firebaseapp.com",
-  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
-  projectId: "qwen-911",
-  storageBucket: "qwen-911.firebasestorage.app",
-  messagingSenderId: "518019892837",
-  appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+authDomain: "qwen-911.firebaseapp.com",
+projectId: "qwen-911",
+storageBucket: "qwen-911.firebasestorage.app",
+messagingSenderId: "518019892837",
+appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getDatabase(app);
-
-const bundles = [
-  {size:"1GB", price:10},
-  {size:"2GB", price:18},
-  {size:"5GB", price:40},
-  {size:"10GB", price:75}
-];
-
-const bundleList = document.getElementById("bundleList");
-const walletDisplay = document.getElementById("walletBalance");
-const receipt = document.getElementById("receipt");
+const db = getFirestore(app);
 
 let currentUser;
 
+/* ===============================
+AUTH LOAD
+================================*/
 onAuthStateChanged(auth, async(user)=>{
-  if(!user){
-    window.location.href="login.html";
-  }else{
-    currentUser=user;
-    const snapshot = await get(ref(db,"users/"+user.uid+"/wallet"));
-    const balance = snapshot.exists() ? snapshot.val() : 0;
-    walletDisplay.innerText="GH₵ "+balance.toFixed(2);
-  }
+
+if(!user) location.href="login.html";
+
+currentUser=user;
+
+const username=user.email.split("@")[0];
+document.getElementById("username").innerText=username;
+
+/* Create user if first time */
+const ref=doc(db,"users",user.uid);
+const snap=await getDoc(ref);
+
+if(!snap.exists()){
+await setDoc(ref,{
+wallet:20,
+online:true
+});
+}
+
+/* Live wallet */
+onSnapshot(ref,(d)=>{
+document.getElementById("wallet")
+.innerText="₵"+d.data().wallet;
 });
 
-bundles.forEach(bundle=>{
-  const div=document.createElement("div");
-  div.className="bundle-card";
-  div.innerHTML=`
-    <div>
-      <strong>${bundle.size}</strong><br>
-      GH₵ ${bundle.price}
-    </div>
-    <button class="buy-btn">Buy</button>
-  `;
-  div.querySelector("button").onclick=()=>buyBundle(bundle);
-  bundleList.appendChild(div);
+/* Online counter */
+onSnapshot(collection(db,"users"),(s)=>{
+document.getElementById("online")
+.innerText=s.size+" online";
 });
 
+loadBundles();
+loadTransactions();
+
+});
+
+/* ===============================
+NETWORK AUTO DETECT
+================================*/
+document.getElementById("phone")
+.addEventListener("input",(e)=>{
+
+const num=e.target.value;
+
+let net="Auto Detect";
+
+if(num.startsWith("024")||num.startsWith("054"))
+net="MTN";
+else if(num.startsWith("020"))
+net="Vodafone";
+else if(num.startsWith("026"))
+net="AirtelTigo";
+
+document.getElementById("network").value=net;
+});
+
+/* ===============================
+LOAD BUNDLES
+================================*/
+function loadBundles(){
+
+const bundleList=[
+{name:"1GB",price:5},
+{name:"2GB",price:9},
+{name:"5GB",price:20},
+{name:"10GB",price:35}
+];
+
+const box=document.getElementById("bundles");
+box.innerHTML="";
+
+bundleList.forEach(b=>{
+const div=document.createElement("div");
+div.className="bundle";
+div.innerHTML=`${b.name}<br>₵${b.price}`;
+div.onclick=()=>buyBundle(b);
+box.appendChild(div);
+});
+}
+
+/* ===============================
+BUY BUNDLE
+================================*/
 async function buyBundle(bundle){
-  const phone=document.getElementById("phone").value;
-  const network=document.getElementById("network").value;
 
-  if(!phone || !network){
-    alert("Enter phone & network");
-    return;
-  }
+const ref=doc(db,"users",currentUser.uid);
+const snap=await getDoc(ref);
 
-  const walletRef=ref(db,"users/"+currentUser.uid+"/wallet");
-  const snap=await get(walletRef);
-  let balance=snap.val()||0;
+let wallet=snap.data().wallet;
 
-  if(balance<bundle.price){
-    alert("Insufficient balance");
-    return;
-  }
+if(wallet<bundle.price){
+alert("Insufficient balance");
+return;
+}
 
-  balance-=bundle.price;
-  await update(ref(db,"users/"+currentUser.uid),{
-    wallet:balance
-  });
+wallet-=bundle.price;
 
-  walletDisplay.innerText="GH₵ "+balance.toFixed(2);
+await updateDoc(ref,{wallet});
 
-  receipt.classList.add("show");
-  setTimeout(()=>receipt.classList.remove("show"),3000);
+/* Save transaction */
+await addDoc(collection(db,"transactions"),{
+uid:currentUser.uid,
+bundle:bundle.name,
+price:bundle.price,
+time:Date.now()
+});
 
-  // Here is where real telecom API will be integrated
+alert("Bundle Activated ⚡");
+}
+
+/* ===============================
+TRANSACTIONS
+================================*/
+function loadTransactions(){
+
+onSnapshot(collection(db,"transactions"),(snap)=>{
+
+const box=document.getElementById("transactions");
+box.innerHTML="";
+
+snap.forEach(docu=>{
+const t=docu.data();
+if(t.uid!==currentUser.uid) return;
+
+const div=document.createElement("div");
+div.className="tx";
+div.innerText=`${t.bundle} — ₵${t.price}`;
+box.appendChild(div);
+});
+});
+}
+
+/* ===============================
+NAVIGATION
+================================*/
+window.go=(page)=>{
+location.href=page;
 }
 
 </script>
 
 </body>
-</html>
+  </html>
