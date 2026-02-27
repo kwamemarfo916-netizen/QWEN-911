@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QWEN-911 Profile</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+/* ================= GLOBAL ================= */
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#050510;
+color:white;
+overflow-x:hidden;
+}
+/* animated glow background */
+body::before{
+content:"";
+position:fixed;
+width:200%;
+height:200%;
+background:
+radial-gradient(circle,#00eaff22,transparent),
+radial-gradient(circle,#7b2fff22,transparent);
+animation:bg 18s linear infinite;
+z-index:-1;
+}
+@keyframes bg{
+0%{transform:translate(0,0)}
+50%{transform:translate(-20%,-20%)}
+100%{transform:translate(0,0)}
+}
+/* ================= HEADER ================= */
+.header{
+text-align:center;
+padding:25px 10px;
+background:linear-gradient(90deg,#00eaff,#7b2fff);
+font-size:22px;
+font-weight:bold;
+}
+/* ================= PROFILE CARD ================= */
+.profile-card{
+margin:15px;
+padding:20px;
+border-radius:18px;
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(15px);
+text-align:center;
+box-shadow:0 0 20px #00eaff33;
+}
+.avatar{
+width:90px;
+height:90px;
+border-radius:50%;
+background:#111;
+margin:auto;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:40px;
+border:2px solid #00eaff;
+}
+.username{
+font-size:18px;
+margin-top:10px;
+}
+.bio{
+font-size:13px;
+opacity:.8;
+}
+/* ================= GRID ================= */
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+padding:10px;
+}
+.card{
+background:#111;
+padding:15px;
+border-radius:14px;
+text-align:center;
+cursor:pointer;
+transition:.3s;
+}
+.card:hover{
+transform:scale(1.05);
+box-shadow:0 0 12px #00eaff;
+}
+/* ================= SETTINGS ================= */
+.settings{
+margin:15px;
+padding:15px;
+background:rgba(255,255,255,.05);
+border-radius:14px;
+}
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+border:none;
+border-radius:10px;
+background:#111;
+color:white;
+}
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:10px;
+background:linear-gradient(90deg,#00eaff,#7b2fff);
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+/* ================= MENU ================= */
+.menu{
+position:fixed;
+bottom:12px;
+left:50%;
+transform:translateX(-50%);
+width:92%;
+background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px;
+border-radius:20px;
+box-shadow:0 0 20px #00eaff55;
+}
+.menu i{
+color:white;
+font-size:26px;
+cursor:pointer;
+}
+.active{
+color:#00eaff;
+}
+.admin-only{
+display:none;
+background:#222;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+text-align:center;
+color:#00ff99;
+font-weight:bold;
+cursor:pointer;
+}
+.admin-visible{
+display:block;
+}
+</style>
+</head>
+<body>
+
+<div class="header">PROFILE</div>
+
+<!-- PROFILE -->
+<div class="profile-card">
+<div class="avatar" id="avatar">👤</div>
+<div class="username" id="username">User</div>
+<div class="bio" id="bio">Future Telecom Legend</div>
+</div>
+
+<!-- STATS -->
+<div class="grid">
+<div class="card">Wallet<br><span id="wallet">₵0</span></div>
+<div class="card">Messages<br><span id="msgs">0</span></div>
+<div class="card">Bundles<br><span id="bundles">0</span></div>
+<div class="card">Online Status<br><span id="status">Active</span></div>
+<div class="card">Achievements</div>
+<div class="card">Rewards</div>
+<div class="card">Security</div>
+<div class="card">Devices</div>
+<div class="card">Dark Mode</div>
+<div class="card">Notifications</div>
+<div class="card">Privacy</div>
+<div class="card">Friends</div>
+<div class="card">Cloud Sync</div>
+<div class="card">Storage</div>
+<div class="card">Themes</div>
+<div class="card">Referral</div>
+<div class="card">Leaderboard</div>
+<div class="card">Support</div>
+<div class="card">About</div>
+<!-- ADMIN CARD -->
+<div class="card admin-only" id="adminCard">ADMIN DASHBOARD</div>
+</div>
+
+<!-- EDIT PROFILE -->
+<div class="settings">
+<h3>Edit Profile</h3>
+<input id="newBio" placeholder="Update bio">
+<button id="saveProfile">Save Changes</button>
+<button id="logout">Logout</button>
+</div>
+
+<!-- MENU BAR -->
+<div class="menu">
+<i class="material-icons" onclick="go('home.html')">home</i>
+<i class="material-icons" onclick="go('stream.html')">videocam</i>
+<i class="material-icons" onclick="go('data.html')">wifi</i>
+<i class="material-icons" onclick="go('chat.html')">chat</i>
+<i class="material-icons active">person</i>
+</div>
+
+<script type="module">
+import { initializeApp } from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getAuth,
+onAuthStateChanged,
+signOut
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+setDoc,
+updateDoc,
+onSnapshot,
+collection
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* FIREBASE CONFIG */
+const firebaseConfig={
+apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+authDomain:"qwen-911.firebaseapp.com",
+projectId:"qwen-911"
+};
+
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let currentUser;
+const adminEmail="kwamemarfo916@gmail.com";
+
+/* AUTH */
+onAuthStateChanged(auth, async(user)=>{
+if(!user) location.href="login.html";
+currentUser=user;
+const username=user.email.split("@")[0];
+
+document.getElementById("username").innerText=username;
+document.getElementById("avatar").innerText=username[0].toUpperCase();
+
+/* SHOW ADMIN CARD ONLY FOR ADMIN EMAIL */
+if(user.email===adminEmail){
+document.getElementById("adminCard").classList.add("admin-visible");
+}
+
+/* USER DOC */
+const ref=doc(db,"users",user.uid);
+const snap=await getDoc(ref);
+
+if(!snap.exists()){
+await setDoc(ref,{
+bio:"Future Telecom Legend",
+wallet:20
+});
+}
+
+/* LIVE PROFILE */
+onSnapshot(ref,(d)=>{
+const data=d.data();
+document.getElementById("bio").innerText=data.bio;
+document.getElementById("wallet").innerText="₵"+data.wallet;
+});
+
+/* COUNT MESSAGES */
+onSnapshot(collection(db,"messages"),(s)=>{
+document.getElementById("msgs").innerText=s.size;
+});
+
+/* COUNT BUNDLES */
+onSnapshot(collection(db,"transactions"),(s)=>{
+let total=0;
+s.forEach(docu=>{
+if(docu.data().uid===user.uid) total++;
+});
+document.getElementById("bundles").innerText=total;
+});
+
+});
+
+/* SAVE PROFILE */
+document.getElementById("saveProfile").onclick=async()=>{
+const bio=document.getElementById("newBio").value;
+if(!bio)return;
+await updateDoc(doc(db,"users",currentUser.uid),{
+bio
+});
+alert("Profile Updated ⚡");
+};
+
+/* LOGOUT */
+document.getElementById("logout").onclick=()=>{
+signOut(auth);
+};
+
+/* NAV */
+window.go=(p)=>location.href=p;
+</script>
+
+</body>
+  </html>
