@@ -1,74 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Privacy Policy - QWEN-911</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            line-height: 1.6;
-            background: #0a0a0a;
-            color: white;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QWEN-911 Privacy Policy</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<style>
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#050510;
+color:white;
+overflow-x:hidden;
+}
 
-        h1, h2 {
-            color: aquamarine;
-        }
+/* Animated background */
+body::before{
+content:"";
+position:fixed;
+width:200%;
+height:200%;
+background:
+radial-gradient(circle,#00eaff22,transparent),
+radial-gradient(circle,#7b2fff22,transparent);
+animation:bg 20s linear infinite;
+z-index:-1;
+}
 
-        a {
-            color: aquamarine;
-        }
-    </style>
+@keyframes bg{
+0%{transform:translate(0,0)}
+50%{transform:translate(-20%,-20%)}
+100%{transform:translate(0,0)}
+}
+
+/* Header */
+.header{
+text-align:center;
+padding:25px 10px;
+background:linear-gradient(90deg,#00eaff,#7b2fff);
+font-size:22px;
+font-weight:bold;
+}
+
+/* Container */
+.container{
+padding:15px;
+max-width:900px;
+margin:auto;
+}
+
+h2{
+color:#00eaff;
+margin-top:20px;
+}
+
+p{
+line-height:1.6;
+opacity:.85;
+margin:8px 0;
+}
+
+/* Contact Info */
+.contact{
+margin-top:20px;
+padding:12px;
+background:rgba(255,255,255,.05);
+border-radius:12px;
+}
+
+/* Menu bar */
+.menu{
+position:fixed;
+bottom:12px;
+left:50%;
+transform:translateX(-50%);
+width:92%;
+background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px;
+border-radius:20px;
+box-shadow:0 0 20px #00eaff55;
+}
+.menu i{
+color:white;
+font-size:26px;
+cursor:pointer;
+}
+.active{
+color:#00eaff;
+}
+</style>
 </head>
 <body>
 
-<h1>Privacy Policy</h1>
-<p>Last Updated: February 2026</p>
+<div class="header">Privacy & Policy</div>
 
-<h2>1. Introduction</h2>
-<p>Welcome to QWEN-911. Your privacy is important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our website.</p>
+<div class="container">
+<h2>Introduction</h2>
+<p>At QWEN-911, we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, and safeguard your information when you use our services.</p>
 
-<h2>2. Information We Collect</h2>
-<p>We may collect the following information:</p>
-<ul>
-<li>Email address (for account registration)</li>
-<li>Username and profile information</li>
-<li>Chat messages sent within the platform</li>
-<li>Technical data such as IP address and browser type</li>
-</ul>
+<h2>Information We Collect</h2>
+<p>We may collect personal data such as your email, phone number, and transaction details. This data is collected securely through Firebase services.</p>
 
-<h2>3. How We Use Your Information</h2>
-<p>We use your information to:</p>
-<ul>
-<li>Provide and maintain our services</li>
-<li>Improve website functionality</li>
-<li>Enable communication through live chat</li>
-<li>Ensure security and prevent abuse</li>
-</ul>
+<h2>Use of Information</h2>
+<p>Your information is used to provide seamless access to chat, streaming, and telecom services, including processing transactions, managing accounts, and enhancing user experience.</p>
 
-<h2>4. Firebase Services</h2>
-<p>QWEN-911 uses Google Firebase services including Authentication and Realtime Database to securely manage user accounts and chat data.</p>
+<h2>Data Sharing</h2>
+<p>We do not sell or share your personal information with third parties outside of our service ecosystem. Your data may be shared with our payment providers or telecom partners only to facilitate services.</p>
 
-<h2>5. Advertising</h2>
-<p>In the future, we may use third-party advertising services such as Google AdSense. These services may use cookies and similar technologies to show relevant ads.</p>
+<h2>Security</h2>
+<p>We use industry-standard measures to protect your data, including Firebase security, encryption, and authentication protocols. However, no system is 100% secure.</p>
 
-<h2>6. Cookies</h2>
-<p>We may use cookies to improve user experience and analyze website performance.</p>
+<h2>Your Rights</h2>
+<p>You can update your profile information, review transactions, or delete your account. Contact us for assistance regarding your data.</p>
 
-<h2>7. Data Security</h2>
-<p>We implement reasonable security measures to protect your information. However, no system is 100% secure.</p>
+<h2>Contact Us</h2>
+<div class="contact">
+<p>Email: <strong>kwamemarfo916@gmail.com</strong></p>
+<p>Phone: <strong>0548773937</strong></p>
+<p>We are available to answer any questions or concerns regarding your privacy.</p>
+</div>
 
-<h2>8. Children's Privacy</h2>
-<p>Our website is not intended for children under 13 years of age.</p>
+<h2>Changes to this Policy</h2>
+<p>We may update this Privacy Policy from time to time. Changes will be posted on this page with the date of revision.</p>
+</div>
 
-<h2>9. Changes to This Policy</h2>
-<p>We may update this Privacy Policy at any time. Updates will be posted on this page.</p>
+<!-- Menu Bar -->
+<div class="menu">
+<i class="material-icons" onclick="go('home.html')">home</i>
+<i class="material-icons" onclick="go('stream.html')">videocam</i>
+<i class="material-icons" onclick="go('data.html')">wifi</i>
+<i class="material-icons" onclick="go('chat.html')">chat</i>
+<i class="material-icons" onclick="go('profile.html')">person</i>
+</div>
 
-<h2>10. Contact Us</h2>
-<p>If you have questions about this Privacy Policy, you may contact us at:</p>
-<p>Email: your-email@example.com</p>
+<script>
+window.go=(p)=>location.href=p;
+</script>
 
 </body>
-  </html>
+    </html>
