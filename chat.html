@@ -58,10 +58,15 @@ Global Chat Room
 </div>
 
 <script type="module">
+
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-import{getDatabase,ref,push,onChildAdded,set,onDisconnect,remove,update,get}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import{
+getDatabase,ref,push,onChildAdded,set,onDisconnect,
+remove,update,get,onValue
+}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
+/* FIREBASE */
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
@@ -73,120 +78,225 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
+const box=messages;
+let replyTo=null;
+let lastSender=null;
+let typingTimeout;
+
+/* AUTH */
 onAuthStateChanged(auth,user=>{
 if(!user)return location.href="login.html";
+
 const username=user.email.split("@")[0];
-const box=document.getElementById("messages");
-let replyTo=null;
+
+/* ================= ONLINE ================= */
 
 const onlineRef=ref(db,"online/"+username);
 set(onlineRef,true);
 onDisconnect(onlineRef).remove();
 
-function updateOnline(){
-get(ref(db,"online")).then(snap=>{
-document.getElementById("onlineCount").innerText=snap.size||0;
+onValue(ref(db,"online"),snap=>{
+onlineCount.innerText=snap.exists()?Object.keys(snap.val()).length:0;
 });
-}
-updateOnline();
-onChildAdded(ref(db,"online"),updateOnline);
 
-sendBtn.onclick=()=>{
+/* ================= SEND ================= */
+
+function send(){
 let text=messageInput.value.trim();
 if(!text)return;
+
 push(ref(db,"messages"),{
-text,user:username,time:Date.now(),
-reply:replyTo||null,
-reactions:{},seen:false
+text,
+user:username,
+time:Date.now(),
+reply:replyTo,
+reactions:{},
+seen:false
 });
+
 messageInput.value="";
 replyTo=null;
-};
+removeReplyPreview();
+}
+
+sendBtn.onclick=send;
+
+messageInput.addEventListener("keydown",e=>{
+if(e.key==="Enter")send();
+});
+
+/* ================= TYPING ================= */
 
 messageInput.oninput=()=>{
 set(ref(db,"typing/"+username),true);
-setTimeout(()=>remove(ref(db,"typing/"+username)),1500);
+
+clearTimeout(typingTimeout);
+typingTimeout=setTimeout(()=>{
+remove(ref(db,"typing/"+username));
+},1200);
 };
 
-onChildAdded(ref(db,"typing"),snap=>{
-typing.innerText=snap.key+" is typing...";
-setTimeout(()=>typing.innerText="",1500);
+onValue(ref(db,"typing"),snap=>{
+if(!snap.exists())return typing.innerText="";
+let users=Object.keys(snap.val()).filter(u=>u!==username);
+typing.innerText=users.length?users.join(", ")+" typing...":"";
 });
+
+/* ================= IMAGE ================= */
 
 imgBtn.onclick=()=>imgInput.click();
+
 imgInput.onchange=e=>{
 const file=e.target.files[0];
-const reader=new FileReader();
-reader.onload=ev=>{
+if(!file)return;
+
+const img=new Image();
+img.src=URL.createObjectURL(file);
+
+img.onload=()=>{
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+
+const scale=600/img.width;
+canvas.width=600;
+canvas.height=img.height*scale;
+
+ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+const data=canvas.toDataURL("image/jpeg",0.7);
+
 push(ref(db,"messages"),{
-image:ev.target.result,
-user:username,time:Date.now(),
-reply:null,reactions:{},seen:false
+image:data,
+user:username,
+time:Date.now(),
+reply:null,
+reactions:{},
+seen:false
 });
 };
-reader.readAsDataURL(file);
 };
 
+/* ================= REPLY PREVIEW ================= */
+
+function showReply(text){
+removeReplyPreview();
+
+const bar=document.createElement("div");
+bar.id="replyBar";
+bar.className="reply-preview";
+bar.innerHTML=`Replying: ${text} ❌`;
+
+bar.onclick=()=>{
+replyTo=null;
+bar.remove();
+};
+
+document.querySelector(".input-area").prepend(bar);
+}
+
+function removeReplyPreview(){
+const old=document.getElementById("replyBar");
+if(old)old.remove();
+}
+
+/* ================= LOAD MESSAGES ================= */
+
 onChildAdded(ref(db,"messages"),snap=>{
-const m=snap.val();const key=snap.key;
+
+const m=snap.val();
+const key=snap.key;
+
 const div=document.createElement("div");
 div.className="msg "+(m.user===username?"sent":"received");
 
+/* GROUP USER LABEL */
+if(lastSender!==m.user){
 const label=document.createElement("div");
 label.className="user-label";
 label.innerText=m.user;
+div.appendChild(label);
+lastSender=m.user;
+}
 
 const bubble=document.createElement("div");
 bubble.className="bubble";
 
 let replyHTML="";
-if(m.reply)replyHTML=`<div class="reply-preview">${m.reply}</div>`;
+if(m.reply){
+replyHTML=`<div class="reply-preview">${m.reply}</div>`;
+}
 
 bubble.innerHTML=`
 ${replyHTML}
 ${m.text||""}
 ${m.image?'<img src="'+m.image+'" style="width:100%;border-radius:8px;margin-top:5px">':""}
 <div class="react">${m.reactions?Object.values(m.reactions).join(" "):""}</div>
-<div class="time">${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+<div class="time">
+${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
 ${m.user===username?'<span class="ticks">'+(m.seen?'✓✓':'✓')+'</span>':""}
 </div>
 `;
 
-bubble.onclick=()=>replyTo=m.text||"Image";
+/* CLICK = REPLY */
+bubble.onclick=()=>{
+replyTo=m.text||"Image";
+showReply(replyTo);
+};
 
+/* DOUBLE CLICK QUICK ❤️ */
+bubble.ondblclick=()=>{
+update(ref(db,"messages/"+key+"/reactions/"+username),"❤️");
+};
+
+/* LONG PRESS MENU */
 bubble.oncontextmenu=e=>{
 e.preventDefault();
-let action=prompt("1.React 2.Edit 3.Delete");
+
+let action=prompt("1.React  2.Edit  3.Delete");
+
 if(action==1){
 let emoji=prompt("Emoji 👍🔥😂❤️");
 if(emoji)update(ref(db,"messages/"+key+"/reactions/"+username),emoji);
 }
+
 if(action==2 && m.user===username){
-let edit=prompt("Edit",m.text);
+let edit=prompt("Edit message",m.text);
 if(edit)update(ref(db,"messages/"+key),{text:edit});
 }
+
 if(action==3 && m.user===username){
 remove(ref(db,"messages/"+key));
 }
 };
 
-div.appendChild(label);
 div.appendChild(bubble);
 box.appendChild(div);
-box.scrollTop=box.scrollHeight;
 
-if(m.user!==username)update(ref(db,"messages/"+key),{seen:true});
+/* SMOOTH SCROLL */
+requestAnimationFrame(()=>{
+box.scrollTop=box.scrollHeight;
 });
+
+/* AUTO SEEN */
+if(m.user!==username){
+update(ref(db,"messages/"+key),{seen:true});
+}
+
+});
+
+/* ================= SEARCH ================= */
 
 search.oninput=()=>{
 let val=search.value.toLowerCase();
-document.querySelectorAll(".bubble").forEach(b=>{
-b.parentElement.style.display=b.innerText.toLowerCase().includes(val)?"flex":"none";
+
+document.querySelectorAll(".msg").forEach(m=>{
+m.style.display=
+m.innerText.toLowerCase().includes(val)?"flex":"none";
 });
 };
 
 });
-</script>
+  </script>
 
 </body>
 </html>
