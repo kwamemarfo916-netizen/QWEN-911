@@ -236,9 +236,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 onAuthStateChanged(auth,(user)=>{
+
+  // If NOT logged in → go to login
   if(!user){
     window.location.href="login.html";
+    return;
   }
+
+  // ✅ USER EXISTS — record app open
+  push(ref(db,"analytics/app_opens"),{
+    time: Date.now(),
+    user: user.email
+  });
+
 });
 
 /* Live Clock */
