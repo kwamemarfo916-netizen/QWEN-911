@@ -1,100 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QWEN-911 Profile</title>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QWEN-911 Dashboard</title>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
-/* ================= GLOBAL ================= */
+
+/* ================= BASE ================= */
 body{
 margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:#050510;
+font-family:Inter,sans-serif;
+background:#06060f;
 color:white;
-overflow-x:hidden;
+padding-bottom:120px;
 }
-/* animated glow background */
-body::before{
-content:"";
-position:fixed;
-width:200%;
-height:200%;
-background:
-radial-gradient(circle,#00eaff22,transparent),
-radial-gradient(circle,#7b2fff22,transparent);
-animation:bg 18s linear infinite;
-z-index:-1;
-}
-@keyframes bg{
-0%{transform:translate(0,0)}
-50%{transform:translate(-20%,-20%)}
-100%{transform:translate(0,0)}
-}
-/* ================= HEADER ================= */
-.header{
+
+/* HEADER */
+header{
+padding:18px;
 text-align:center;
-padding:25px 10px;
-background:linear-gradient(90deg,#00eaff,#7b2fff);
-font-size:22px;
+background:linear-gradient(135deg,#00f5ff,#8b5cf6);
 font-weight:bold;
+font-size:20px;
 }
-/* ================= PROFILE CARD ================= */
-.profile-card{
+
+/* PROFILE CARD */
+.profile{
 margin:15px;
 padding:20px;
 border-radius:18px;
 background:rgba(255,255,255,.05);
-backdrop-filter:blur(15px);
+backdrop-filter:blur(20px);
 text-align:center;
-box-shadow:0 0 20px #00eaff33;
 }
+
 .avatar{
-width:90px;
-height:90px;
+width:80px;
+height:80px;
 border-radius:50%;
 background:#111;
-margin:auto;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:40px;
-border:2px solid #00eaff;
+margin:auto;
+font-size:32px;
+border:2px solid #00f5ff;
 }
+
 .username{
-font-size:18px;
 margin-top:10px;
+font-size:18px;
 }
+
 .bio{
 font-size:13px;
 opacity:.8;
 }
-/* ================= GRID ================= */
+
+/* STATS GRID */
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
-gap:12px;
+gap:10px;
 padding:10px;
 }
+
 .card{
-background:#111;
+background:rgba(255,255,255,.05);
 padding:15px;
 border-radius:14px;
 text-align:center;
-cursor:pointer;
-transition:.3s;
 }
-.card:hover{
-transform:scale(1.05);
-box-shadow:0 0 12px #00eaff;
-}
-/* ================= SETTINGS ================= */
+
+/* SETTINGS */
 .settings{
 margin:15px;
 padding:15px;
 background:rgba(255,255,255,.05);
 border-radius:14px;
 }
+
 input{
 width:100%;
 padding:10px;
@@ -104,131 +92,124 @@ border-radius:10px;
 background:#111;
 color:white;
 }
+
 button{
 width:100%;
 padding:12px;
 margin-top:10px;
 border:none;
 border-radius:10px;
-background:linear-gradient(90deg,#00eaff,#7b2fff);
-color:white;
+background:linear-gradient(135deg,#00f5ff,#8b5cf6);
+color:black;
 font-weight:bold;
 cursor:pointer;
 }
-/* ================= MENU ================= */
-.menu{
+
+/* ADMIN PANEL */
+.admin{
+display:none;
+margin:15px;
+padding:15px;
+border-radius:14px;
+background:#111;
+border:1px solid #00f5ff44;
+}
+
+/* ===== FLOATING MENU (IDENTICAL TO HOME) ===== */
+.menu-bar{
 position:fixed;
-bottom:12px;
+bottom:20px;
 left:50%;
 transform:translateX(-50%);
 width:92%;
-background:#111;
+max-width:450px;
+background:rgba(20,20,30,.9);
+backdrop-filter:blur(25px);
+border-radius:35px;
 display:flex;
 justify-content:space-around;
-padding:12px;
-border-radius:20px;
-box-shadow:0 0 20px #00eaff55;
+padding:14px 5px;
+box-shadow:0 0 20px rgba(0,245,255,.3);
 }
-.menu i{
-color:white;
-font-size:26px;
-cursor:pointer;
-}
-.active{
-color:#00eaff;
-}
-.admin-only{
-display:none;
-background:#222;
-padding:10px;
-border-radius:10px;
-margin-top:10px;
+
+.menu-bar a{
+color:#888;
+font-size:22px;
+flex:1;
 text-align:center;
-color:#00ff99;
-font-weight:bold;
-cursor:pointer;
+text-decoration:none;
 }
-.admin-visible{
-display:block;
+
+.menu-bar a.active{
+color:#00f5ff;
+transform:translateY(-6px);
 }
+
 </style>
 </head>
+
 <body>
 
-<div class="header">PROFILE</div>
+<header>PROFILE DASHBOARD</header>
 
 <!-- PROFILE -->
-<div class="profile-card">
-<div class="avatar" id="avatar">👤</div>
+<div class="profile">
+<div class="avatar" id="avatar">U</div>
 <div class="username" id="username">User</div>
-<div class="bio" id="bio">Future Telecom Legend</div>
+<div class="bio" id="bio">Loading...</div>
 </div>
 
 <!-- STATS -->
 <div class="grid">
-<div class="card">Wallet<br><span id="wallet">₵0</span></div>
-<div class="card">Messages<br><span id="msgs">0</span></div>
-<div class="card">Bundles<br><span id="bundles">0</span></div>
-<div class="card">Online Status<br><span id="status">Active</span></div>
-<div class="card">Achievements</div>
-<div class="card">Rewards</div>
-<div class="card">Security</div>
-<div class="card">Devices</div>
-<div class="card">Dark Mode</div>
-<div class="card">Notifications</div>
-<div class="card">Privacy</div>
-<div class="card">Friends</div>
-<div class="card">Cloud Sync</div>
-<div class="card">Storage</div>
-<div class="card">Themes</div>
-<div class="card">Referral</div>
-<div class="card">Leaderboard</div>
-<div class="card">Support</div>
-<div class="card">About</div>
-<!-- ADMIN CARD -->
-<div class="card admin-only" id="adminCard">ADMIN DASHBOARD</div>
+<div class="card">Wallet<br><b id="wallet">₵0</b></div>
+<div class="card">Messages<br><b id="messagesCount">0</b></div>
+<div class="card">Bundles<br><b id="bundleCount">0</b></div>
+<div class="card">Status<br><b>Online</b></div>
 </div>
 
-<!-- EDIT PROFILE -->
+<!-- SETTINGS -->
 <div class="settings">
 <h3>Edit Profile</h3>
-<input id="newBio" placeholder="Update bio">
-<button id="saveProfile">Save Changes</button>
-<button id="logout">Logout</button>
+<input id="bioInput" placeholder="Update bio">
+<button id="saveBtn">Save Changes</button>
+<button id="logoutBtn">Logout</button>
 </div>
 
-<!-- MENU BAR -->
-<div class="menu">
-<i class="material-icons" onclick="go('home.html')">home</i>
-<i class="material-icons" onclick="go('stream.html')">videocam</i>
-<i class="material-icons" onclick="go('data.html')">wifi</i>
-<i class="material-icons" onclick="go('chat.html')">chat</i>
-<i class="material-icons active">person</i>
+<!-- ADMIN -->
+<div class="admin" id="adminPanel">
+<h3>ADMIN PANEL</h3>
+<button id="addMoney">Add ₵10 To Wallet</button>
+<button onclick="location.href='admin.html'">
+Open Admin Dashboard
+</button>
+</div>
+
+<!-- FLOATING MENU (SAME AS HOME) -->
+<div class="menu-bar">
+<a href="home.html"><i class="fa-solid fa-house"></i></a>
+<a href="stream.html"><i class="fa-solid fa-video"></i></a>
+<a href="data.html"><i class="fa-solid fa-sim-card"></i></a>
+<a href="chat.html"><i class="fa-solid fa-comments"></i></a>
+<a class="active"><i class="fa-solid fa-user"></i></a>
 </div>
 
 <script type="module">
-import { initializeApp } from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
 import {
-getAuth,
-onAuthStateChanged,
-signOut
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+getAuth,onAuthStateChanged,signOut
+}
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 import {
-getFirestore,
-doc,
-getDoc,
-setDoc,
-updateDoc,
-onSnapshot,
-collection
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+getFirestore,doc,getDoc,setDoc,updateDoc,
+onSnapshot,collection
+}
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
@@ -239,75 +220,78 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
-let currentUser;
-const adminEmail="kwamemarfo916@gmail.com";
+/* ADMIN EMAIL */
+const ADMIN_EMAIL="kwamemarfo916@gmail.com";
 
-/* AUTH */
-onAuthStateChanged(auth, async(user)=>{
+let uid;
+
+/* AUTH CHECK */
+onAuthStateChanged(auth, async user=>{
 if(!user) location.href="login.html";
-currentUser=user;
+
+uid=user.uid;
 const username=user.email.split("@")[0];
 
-document.getElementById("username").innerText=username;
-document.getElementById("avatar").innerText=username[0].toUpperCase();
+usernameEl.innerText=username;
+avatar.innerText=username[0].toUpperCase();
 
-/* SHOW ADMIN CARD ONLY FOR ADMIN EMAIL */
-if(user.email===adminEmail){
-document.getElementById("adminCard").classList.add("admin-visible");
+/* SHOW ADMIN */
+if(user.email===ADMIN_EMAIL){
+adminPanel.style.display="block";
 }
 
 /* USER DOC */
-const ref=doc(db,"users",user.uid);
-const snap=await getDoc(ref);
+const userRef=doc(db,"users",uid);
+const snap=await getDoc(userRef);
 
 if(!snap.exists()){
-await setDoc(ref,{
-bio:"Future Telecom Legend",
+await setDoc(userRef,{
+bio:"Telecom Explorer",
 wallet:20
 });
 }
 
 /* LIVE PROFILE */
-onSnapshot(ref,(d)=>{
+onSnapshot(userRef,d=>{
 const data=d.data();
-document.getElementById("bio").innerText=data.bio;
-document.getElementById("wallet").innerText="₵"+data.wallet;
+bio.innerText=data.bio;
+wallet.innerText="₵"+data.wallet;
 });
 
-/* COUNT MESSAGES */
-onSnapshot(collection(db,"messages"),(s)=>{
-document.getElementById("msgs").innerText=s.size;
-});
+/* MESSAGE COUNT */
+onSnapshot(collection(db,"messages"),
+s=>messagesCount.innerText=s.size);
 
-/* COUNT BUNDLES */
-onSnapshot(collection(db,"transactions"),(s)=>{
+/* BUNDLE COUNT */
+onSnapshot(collection(db,"transactions"),s=>{
 let total=0;
-s.forEach(docu=>{
-if(docu.data().uid===user.uid) total++;
+s.forEach(d=>{
+if(d.data().uid===uid) total++;
 });
-document.getElementById("bundles").innerText=total;
-});
-
+bundleCount.innerText=total;
 });
 
-/* SAVE PROFILE */
-document.getElementById("saveProfile").onclick=async()=>{
-const bio=document.getElementById("newBio").value;
-if(!bio)return;
-await updateDoc(doc(db,"users",currentUser.uid),{
-bio
 });
-alert("Profile Updated ⚡");
+
+/* SAVE BIO */
+saveBtn.onclick=()=>{
+updateDoc(doc(db,"users",uid),{
+bio:bioInput.value
+});
 };
 
 /* LOGOUT */
-document.getElementById("logout").onclick=()=>{
-signOut(auth);
+logoutBtn.onclick=()=>signOut(auth);
+
+/* ADMIN ADD MONEY */
+addMoney.onclick=async()=>{
+const ref=doc(db,"users",uid);
+const snap=await getDoc(ref);
+let bal=snap.data().wallet||0;
+await updateDoc(ref,{wallet:bal+10});
 };
 
-/* NAV */
-window.go=(p)=>location.href=p;
 </script>
 
 </body>
-  </html>
+</html>
