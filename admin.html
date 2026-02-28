@@ -1,187 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QWEN-911 Admin Dashboard</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <style>
+
 body{
 margin:0;
-font-family:Arial,sans-serif;
-background:#0e1621;
-color:white;
-padding:15px;
+font-family:Inter;
+background:#05060c;
+color:#fff;
 }
 
-h2{
-margin-top:15px;
+header{
+text-align:center;
+padding:16px;
+background:rgba(15,15,25,.9);
+border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-/* Tables */
-table{
-width:100%;
-border-collapse:collapse;
-margin-bottom:20px;
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:12px;
+padding:14px;
 }
 
-th,td{
+.card{
+background:rgba(255,255,255,.05);
+border-radius:16px;
+padding:14px;
+border:1px solid rgba(255,255,255,.07);
+}
+
+.big{
+font-size:20px;
+margin-top:5px;
+}
+
+.users{
+padding:14px;
+}
+
+.userRow{
+display:flex;
+justify-content:space-between;
 padding:10px;
-text-align:left;
-border-bottom:1px solid #1f2a36;
+border-bottom:1px solid rgba(255,255,255,.05);
+font-size:13px;
 }
 
-th{
-background:#17212b;
-}
-
-tr:hover{
-background:#1f2a36;
-}
-
-/* Buttons */
-button{
-padding:6px 12px;
-border:none;
-border-radius:6px;
-background:aquamarine;
-cursor:pointer;
-color:black;
-font-weight:bold;
-}
-
-input{
-padding:6px;
-border-radius:6px;
-border:none;
-width:100px;
-}
 </style>
 </head>
+
 <body>
 
-<h1>💻 QWEN-911 Admin Dashboard</h1>
+<header>
+<h3>ADMIN CONTROL CENTER</h3>
+</header>
 
-<h2>👥 Users & Balances</h2>
-<table id="usersTable">
-<tr><th>Email</th><th>Balance (GHS)</th><th>Manual Credit</th></tr>
-</table>
+<div class="grid">
 
-<h2>📦 Transactions</h2>
-<table id="txTable">
-<tr><th>User</th><th>Network</th><th>Amount</th><th>Phone</th><th>TX ID</th><th>Date</th></tr>
-</table>
+<div class="card">
+Total Users
+<div class="big" id="totalUsers">0</div>
+</div>
 
-<h2>➕ Top-ups</h2>
-<table id="topupTable">
-<tr><th>User</th><th>Amount</th><th>Date</th></tr>
-</table>
+<div class="card">
+Total Purchases
+<div class="big" id="totalPurchases">0</div>
+</div>
+
+<div class="card">
+Money Received (₵)
+<div class="big" id="moneyReceived">0</div>
+</div>
+
+<div class="card">
+Active Online
+<div class="big" id="onlineUsers">0</div>
+</div>
+
+</div>
+
+<div class="users">
+<h4>User Balances</h4>
+<div id="usersList"></div>
+</div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, get, update, push, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* Firebase config */
-const firebaseConfig = {
-apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-authDomain: "qwen-911.firebaseapp.com",
-databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
-projectId: "qwen-911",
-storageBucket: "qwen-911.firebasestorage.app",
-messagingSenderId: "518019892837",
-appId: "1:518019892837:web:9972dd63d8dca7936ea88c"
+import{initializeApp}
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+
+import{
+getAuth,onAuthStateChanged
+}
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+import{
+getDatabase,ref,onValue
+}
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+authDomain:"qwen-911.firebaseapp.com",
+databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
+projectId:"qwen-911"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth();
+const ADMIN_EMAIL="kwamemarfo916@gmail.com";
 
-const adminEmail = "kwamemarfo916@gmail.com";
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-/* AUTH CHECK */
-onAuthStateChanged(auth, user=>{
-    if(!user || user.email !== adminEmail){
-        alert("Access denied. Admin only.");
-        window.location.href="login.html";
-    }else{
-        loadUsers();
-        loadTransactions();
-        loadTopups();
-    }
+/* ADMIN PROTECTION */
+onAuthStateChanged(auth,user=>{
+
+if(!user || user.email!==ADMIN_EMAIL){
+alert("Admin access only");
+location.href="home.html";
+return;
+}
+
+/* USERS DATA */
+
+onValue(ref(db,"users"),snap=>{
+
+if(!snap.exists())return;
+
+let users=snap.val();
+let totalMoney=0;
+let totalBuys=0;
+let count=0;
+
+usersList.innerHTML="";
+
+Object.entries(users).forEach(([uid,data])=>{
+
+count++;
+totalMoney+=data.totalSpent||0;
+totalBuys+=data.totalBuys||0;
+
+const row=document.createElement("div");
+row.className="userRow";
+
+row.innerHTML=`
+<span>${data.email || uid}</span>
+<span>₵ ${(data.balance||0).toFixed(2)}</span>
+`;
+
+usersList.appendChild(row);
+
 });
 
-/* Load Users & Balances */
-async function loadUsers(){
-    const snap = await get(ref(db,"users"));
-    const table = document.getElementById("usersTable");
-    if(snap.exists()){
-        const users = snap.val();
-        for(const uid in users){
-            const row = table.insertRow();
-            row.insertCell(0).textContent = users[uid].email || uid;
-            row.insertCell(1).textContent = users[uid].balance.toFixed(2);
+totalUsers.textContent=count;
+totalPurchases.textContent=totalBuys;
+moneyReceived.textContent=totalMoney.toFixed(2);
 
-            const creditCell = row.insertCell(2);
-            const input = document.createElement("input");
-            input.type="number";
-            input.placeholder="Amount";
-            const btn = document.createElement("button");
-            btn.textContent="Credit";
-            btn.onclick=async ()=>{
-                const amt=Number(input.value);
-                if(amt>0){
-                    const newBal=users[uid].balance+amt;
-                    await update(ref(db,"users/"+uid),{balance:newBal});
-                    alert("Wallet credited successfully!");
-                    location.reload();
-                }
-            }
-            creditCell.appendChild(input);
-            creditCell.appendChild(btn);
-        }
-    }
-}
+});
 
-/* Load Transactions */
-async function loadTransactions(){
-    const snap = await get(ref(db,"transactions"));
-    const table = document.getElementById("txTable");
-    if(snap.exists()){
-        const allTx = snap.val();
-        for(const uid in allTx){
-            const userTx = allTx[uid];
-            for(const txId in userTx){
-                const tx = userTx[txId];
-                const row = table.insertRow();
-                row.insertCell(0).textContent = tx.user;
-                row.insertCell(1).textContent = tx.network;
-                row.insertCell(2).textContent = tx.amount;
-                row.insertCell(3).textContent = tx.phone;
-                row.insertCell(4).textContent = tx.transactionId;
-                row.insertCell(5).textContent = tx.date;
-            }
-        }
-    }
-}
+/* ONLINE USERS */
+onValue(ref(db,"online"),snap=>{
+onlineUsers.textContent=
+snap.exists()?Object.keys(snap.val()).length:0;
+});
 
-/* Load Top-ups */
-async function loadTopups(){
-    const snap = await get(ref(db,"topups"));
-    const table = document.getElementById("topupTable");
-    if(snap.exists()){
-        const allTop = snap.val();
-        for(const uid in allTop){
-            const userTop = allTop[uid];
-            for(const topId in userTop){
-                const top = userTop[topId];
-                const row = table.insertRow();
-                row.insertCell(0).textContent = top.user || uid;
-                row.insertCell(1).textContent = top.amount;
-                row.insertCell(2).textContent = top.date;
-            }
-        }
-    }
-}
+});
+
 </script>
-
 </body>
-  </html>
+                        </html>
