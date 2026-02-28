@@ -1,297 +1,190 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QWEN-911 Dashboard</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QWEN-911 Profile</title>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <style>
 
-/* ================= BASE ================= */
 body{
 margin:0;
-font-family:Inter,sans-serif;
-background:#06060f;
-color:white;
+font-family:Inter;
+background:#070810;
+color:#fff;
 padding-bottom:120px;
 }
 
-/* HEADER */
 header{
-padding:18px;
 text-align:center;
-background:linear-gradient(135deg,#00f5ff,#8b5cf6);
-font-weight:bold;
-font-size:20px;
+padding:15px;
+background:rgba(20,20,30,.9);
+backdrop-filter:blur(15px);
+border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-/* PROFILE CARD */
-.profile{
-margin:15px;
-padding:20px;
-border-radius:18px;
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(20px);
-text-align:center;
-}
-
-.avatar{
-width:80px;
-height:80px;
-border-radius:50%;
-background:#111;
+.container{
+padding:15px;
 display:flex;
-align-items:center;
-justify-content:center;
-margin:auto;
-font-size:32px;
-border:2px solid #00f5ff;
-}
-
-.username{
-margin-top:10px;
-font-size:18px;
-}
-
-.bio{
-font-size:13px;
-opacity:.8;
-}
-
-/* STATS GRID */
-.grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-padding:10px;
+flex-direction:column;
+gap:14px;
 }
 
 .card{
 background:rgba(255,255,255,.05);
-padding:15px;
-border-radius:14px;
-text-align:center;
+border-radius:16px;
+padding:14px;
+border:1px solid rgba(255,255,255,.07);
 }
 
-/* SETTINGS */
-.settings{
-margin:15px;
-padding:15px;
-background:rgba(255,255,255,.05);
-border-radius:14px;
+.title{
+font-size:13px;
+opacity:.7;
+margin-bottom:6px;
 }
 
-input{
-width:100%;
-padding:10px;
-margin-top:8px;
-border:none;
-border-radius:10px;
-background:#111;
-color:white;
+.value{
+font-size:15px;
+word-break:break-all;
 }
 
 button{
 width:100%;
 padding:12px;
-margin-top:10px;
 border:none;
-border-radius:10px;
-background:linear-gradient(135deg,#00f5ff,#8b5cf6);
-color:black;
-font-weight:bold;
+border-radius:14px;
+margin-top:8px;
+font-weight:600;
 cursor:pointer;
 }
 
-/* ADMIN PANEL */
+.primary{
+background:linear-gradient(135deg,#00f5ff,#a855f7);
+color:#000;
+}
+
 .admin{
-display:none;
-margin:15px;
-padding:15px;
-border-radius:14px;
-background:#111;
-border:1px solid #00f5ff44;
+background:linear-gradient(135deg,#ffb300,#ff0066);
+color:#000;
 }
 
-/* ===== FLOATING MENU (IDENTICAL TO HOME) ===== */
-.menu-bar{
-position:fixed;
-bottom:20px;
-left:50%;
-transform:translateX(-50%);
-width:92%;
-max-width:450px;
-background:rgba(20,20,30,.9);
-backdrop-filter:blur(25px);
-border-radius:35px;
-display:flex;
-justify-content:space-around;
-padding:14px 5px;
-box-shadow:0 0 20px rgba(0,245,255,.3);
+.logout{
+background:#ff3b3b;
+color:#fff;
 }
 
-.menu-bar a{
-color:#888;
-font-size:22px;
-flex:1;
-text-align:center;
-text-decoration:none;
-}
-
-.menu-bar a.active{
-color:#00f5ff;
-transform:translateY(-6px);
-}
+.hidden{display:none;}
 
 </style>
 </head>
 
 <body>
 
-<header>PROFILE DASHBOARD</header>
+<header>
+<h3>My Profile</h3>
+</header>
 
-<!-- PROFILE -->
-<div class="profile">
-<div class="avatar" id="avatar">U</div>
-<div class="username" id="username">User</div>
-<div class="bio" id="bio">Loading...</div>
+<div class="container">
+
+<div class="card">
+<div class="title">User Email</div>
+<div class="value" id="userEmail">Loading...</div>
 </div>
 
-<!-- STATS -->
-<div class="grid">
-<div class="card">Wallet<br><b id="wallet">₵0</b></div>
-<div class="card">Messages<br><b id="messagesCount">0</b></div>
-<div class="card">Bundles<br><b id="bundleCount">0</b></div>
-<div class="card">Status<br><b>Online</b></div>
+<div class="card">
+<div class="title">Username</div>
+<div class="value" id="username"></div>
 </div>
 
-<!-- SETTINGS -->
-<div class="settings">
-<h3>Edit Profile</h3>
-<input id="bioInput" placeholder="Update bio">
-<button id="saveBtn">Save Changes</button>
-<button id="logoutBtn">Logout</button>
+<div class="card">
+<div class="title">Account Balance</div>
+<div class="value">₵ <span id="balance">0.00</span></div>
 </div>
 
-<!-- ADMIN -->
-<div class="admin" id="adminPanel">
-<h3>ADMIN PANEL</h3>
-<button id="addMoney">Add ₵10 To Wallet</button>
-<button onclick="location.href='admin.html'">
-Open Admin Dashboard
+<div class="card">
+<div class="title">Total Purchases</div>
+<div class="value" id="totalBuys">0</div>
+</div>
+
+<div class="card">
+<button id="adminBtn" class="admin hidden">
+Admin Dashboard
+</button>
+
+<button id="logoutBtn" class="logout">
+Logout
 </button>
 </div>
 
-<!-- FLOATING MENU (SAME AS HOME) -->
-<div class="menu-bar">
-<a href="home.html"><i class="fa-solid fa-house"></i></a>
-<a href="stream.html"><i class="fa-solid fa-video"></i></a>
-<a href="data.html"><i class="fa-solid fa-sim-card"></i></a>
-<a href="chat.html"><i class="fa-solid fa-comments"></i></a>
-<a class="active"><i class="fa-solid fa-user"></i></a>
 </div>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import{initializeApp}
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
-import {
+import{
 getAuth,onAuthStateChanged,signOut
 }
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-import {
-getFirestore,doc,getDoc,setDoc,updateDoc,
-onSnapshot,collection
+import{
+getDatabase,ref,onValue
 }
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-/* FIREBASE */
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
+databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
 projectId:"qwen-911"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
-
-/* ADMIN EMAIL */
 const ADMIN_EMAIL="kwamemarfo916@gmail.com";
 
-let uid;
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getDatabase(app);
 
-/* AUTH CHECK */
-onAuthStateChanged(auth, async user=>{
-if(!user) location.href="login.html";
+onAuthStateChanged(auth,user=>{
 
-uid=user.uid;
-const username=user.email.split("@")[0];
+if(!user)location.href="index.html";
 
-usernameEl.innerText=username;
-avatar.innerText=username[0].toUpperCase();
+userEmail.textContent=user.email;
+username.textContent=user.email.split("@")[0];
 
-/* SHOW ADMIN */
+const userRef=ref(db,"users/"+user.uid);
+
+onValue(userRef,snap=>{
+if(!snap.exists())return;
+
+const data=snap.val();
+
+balance.textContent=(data.balance||0).toFixed(2);
+totalBuys.textContent=data.totalBuys||0;
+});
+
+/* ADMIN ACCESS */
 if(user.email===ADMIN_EMAIL){
-adminPanel.style.display="block";
+adminBtn.classList.remove("hidden");
 }
 
-/* USER DOC */
-const userRef=doc(db,"users",uid);
-const snap=await getDoc(userRef);
-
-if(!snap.exists()){
-await setDoc(userRef,{
-bio:"Telecom Explorer",
-wallet:20
-});
-}
-
-/* LIVE PROFILE */
-onSnapshot(userRef,d=>{
-const data=d.data();
-bio.innerText=data.bio;
-wallet.innerText="₵"+data.wallet;
 });
 
-/* MESSAGE COUNT */
-onSnapshot(collection(db,"messages"),
-s=>messagesCount.innerText=s.size);
-
-/* BUNDLE COUNT */
-onSnapshot(collection(db,"transactions"),s=>{
-let total=0;
-s.forEach(d=>{
-if(d.data().uid===uid) total++;
-});
-bundleCount.innerText=total;
-});
-
-});
-
-/* SAVE BIO */
-saveBtn.onclick=()=>{
-updateDoc(doc(db,"users",uid),{
-bio:bioInput.value
-});
+/* ADMIN BUTTON */
+adminBtn.onclick=()=>{
+location.href="admin.html";
 };
 
 /* LOGOUT */
-logoutBtn.onclick=()=>signOut(auth);
-
-/* ADMIN ADD MONEY */
-addMoney.onclick=async()=>{
-const ref=doc(db,"users",uid);
-const snap=await getDoc(ref);
-let bal=snap.data().wallet||0;
-await updateDoc(ref,{wallet:bal+10});
+logoutBtn.onclick=()=>{
+signOut(auth).then(()=>{
+location.href="index.html";
+});
 };
 
 </script>
-
 </body>
 </html>
