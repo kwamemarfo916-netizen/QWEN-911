@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QWEN-911 Admin Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QWEN-911 SUPER ADMIN</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -11,47 +13,79 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 body{
 margin:0;
-font-family:Inter;
+font-family:Inter,sans-serif;
 background:#05060c;
 color:#fff;
+padding-bottom:120px;
 }
 
 header{
 text-align:center;
-padding:16px;
-background:rgba(15,15,25,.9);
-border-bottom:1px solid rgba(255,255,255,.06);
+padding:14px;
+background:rgba(20,20,30,.9);
+backdrop-filter:blur(15px);
 }
 
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+.container{
+padding:12px;
+display:flex;
+flex-direction:column;
 gap:12px;
-padding:14px;
 }
 
 .card{
 background:rgba(255,255,255,.05);
 border-radius:16px;
 padding:14px;
-border:1px solid rgba(255,255,255,.07);
+border:1px solid rgba(255,255,255,.08);
 }
 
-.big{
-font-size:20px;
-margin-top:5px;
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
 }
 
-.users{
+.stat{
+font-size:22px;
+color:#00f5ff;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:12px;
+border:none;
+}
+
+button{
+background:linear-gradient(135deg,#00f5ff,#a855f7);
+font-weight:bold;
+cursor:pointer;
+}
+
+.menu-bar{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:92%;
+max-width:450px;
+background:rgba(20,20,30,.9);
+backdrop-filter:blur(25px);
+border-radius:35px;
+display:flex;
+justify-content:space-around;
 padding:14px;
 }
 
-.userRow{
-display:flex;
-justify-content:space-between;
-padding:10px;
-border-bottom:1px solid rgba(255,255,255,.05);
-font-size:13px;
+.menu-bar a{
+color:#888;
+font-size:22px;
+flex:1;
+text-align:center;
+text-decoration:none;
 }
 
 </style>
@@ -60,36 +94,53 @@ font-size:13px;
 <body>
 
 <header>
-<h3>ADMIN CONTROL CENTER</h3>
+<h3>SUPER ADMIN CONTROL</h3>
 </header>
 
-<div class="grid">
+<div class="container">
 
+<!-- STATS -->
+<div class="card grid">
+<div>Users<br><span class="stat" id="usersCount">0</span></div>
+<div>Online<br><span class="stat" id="onlineCount">0</span></div>
+<div>Revenue ₵<br><span class="stat" id="revenue">0</span></div>
+<div>Transactions<br><span class="stat" id="txCount">0</span></div>
+</div>
+
+<!-- CHART -->
 <div class="card">
-Total Users
-<div class="big" id="totalUsers">0</div>
+<canvas id="revenueChart"></canvas>
 </div>
 
+<!-- USER CONTROL -->
 <div class="card">
-Total Purchases
-<div class="big" id="totalPurchases">0</div>
+<h4>User Control</h4>
+<input id="uid" placeholder="User UID">
+<input id="amount" placeholder="Amount">
+<button id="addBal">Add Balance</button>
+<button id="deductBal">Deduct Balance</button>
 </div>
 
+<!-- PLATFORM CONTROL -->
 <div class="card">
-Money Received (₵)
-<div class="big" id="moneyReceived">0</div>
+<h4>Platform Controls</h4>
+
+<button id="maintenanceBtn">Toggle Maintenance Mode</button>
+<button id="disableChatBtn">Toggle Chat</button>
+
+<input id="announcement" placeholder="Broadcast message">
+<button id="broadcast">Send Announcement</button>
 </div>
 
-<div class="card">
-Active Online
-<div class="big" id="onlineUsers">0</div>
 </div>
 
-</div>
-
-<div class="users">
-<h4>User Balances</h4>
-<div id="usersList"></div>
+<!-- FLOAT MENU -->
+<div class="menu-bar">
+<a href="home.html"><i class="fa-solid fa-house"></i></a>
+<a href="stream.html"><i class="fa-solid fa-video"></i></a>
+<a href="data.html"><i class="fa-solid fa-sim-card"></i></a>
+<a href="chat.html"><i class="fa-solid fa-comments"></i></a>
+<a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
 
 <script type="module">
@@ -103,7 +154,7 @@ getAuth,onAuthStateChanged
 from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 import{
-getDatabase,ref,onValue
+getDatabase,ref,onValue,update,push,set
 }
 from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
@@ -114,66 +165,103 @@ databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
 projectId:"qwen-911"
 };
 
-const ADMIN_EMAIL="kwamemarfo916@gmail.com";
+const ADMIN="kwamemarfo916@gmail.com";
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
-/* ADMIN PROTECTION */
+/* ADMIN LOCK */
 onAuthStateChanged(auth,user=>{
-
-if(!user || user.email!==ADMIN_EMAIL){
-alert("Admin access only");
+if(!user||user.email!==ADMIN)
 location.href="home.html";
-return;
-}
+});
 
-/* USERS DATA */
-
+/* LIVE USERS */
 onValue(ref(db,"users"),snap=>{
-
 if(!snap.exists())return;
 
 let users=snap.val();
-let totalMoney=0;
-let totalBuys=0;
-let count=0;
+usersCount.textContent=Object.keys(users).length;
 
-usersList.innerHTML="";
+let revenue=0,tx=0;
 
-Object.entries(users).forEach(([uid,data])=>{
-
-count++;
-totalMoney+=data.totalSpent||0;
-totalBuys+=data.totalBuys||0;
-
-const row=document.createElement("div");
-row.className="userRow";
-
-row.innerHTML=`
-<span>${data.email || uid}</span>
-<span>₵ ${(data.balance||0).toFixed(2)}</span>
-`;
-
-usersList.appendChild(row);
-
+Object.values(users).forEach(u=>{
+revenue+=u.totalSpent||0;
+tx+=u.totalBuys||0;
 });
 
-totalUsers.textContent=count;
-totalPurchases.textContent=totalBuys;
-moneyReceived.textContent=totalMoney.toFixed(2);
-
+revenueEl(revenue,tx);
 });
 
-/* ONLINE USERS */
+function revenueEl(rev,tx){
+revenue.textContent=rev.toFixed(2);
+txCount.textContent=tx;
+updateChart(rev);
+}
+
+/* ONLINE */
 onValue(ref(db,"online"),snap=>{
-onlineUsers.textContent=
+onlineCount.textContent=
 snap.exists()?Object.keys(snap.val()).length:0;
 });
 
+/* BALANCE CONTROL */
+addBal.onclick=()=>{
+update(ref(db,"users/"+uid.value),{
+balance:parseFloat(amount.value)
+});
+logAdmin("Added balance");
+};
+
+deductBal.onclick=()=>{
+update(ref(db,"users/"+uid.value),{balance:0});
+logAdmin("Removed balance");
+};
+
+/* BROADCAST */
+broadcast.onclick=()=>{
+push(ref(db,"announcements"),{
+text:announcement.value,
+time:Date.now()
+});
+announcement.value="";
+};
+
+/* PLATFORM TOGGLES */
+maintenanceBtn.onclick=()=>{
+set(ref(db,"settings/maintenance"),true);
+};
+
+disableChatBtn.onclick=()=>{
+set(ref(db,"settings/chatDisabled"),true);
+};
+
+/* ADMIN LOG */
+function logAdmin(action){
+push(ref(db,"adminLogs"),{
+action,
+time:Date.now()
+});
+}
+
+/* CHART */
+const ctx=document.getElementById("revenueChart");
+const chart=new Chart(ctx,{
+type:"line",
+data:{
+labels:["Now"],
+datasets:[{data:[0]}]
+}
 });
 
+function updateChart(val){
+chart.data.datasets[0].data.push(val);
+chart.data.labels.push("");
+chart.update();
+}
+
 </script>
+
 </body>
-                        </html>
+  </html>
