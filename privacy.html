@@ -1,143 +1,129 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>QWEN-911 Privacy Policy</title>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-background:#050510;
-color:white;
-overflow-x:hidden;
+body {
+  margin:0;
+  font-family:Inter,sans-serif;
+  background:#070912;
+  color:#fff;
+  padding-bottom:120px;
 }
-
-/* Animated background */
-body::before{
-content:"";
-position:fixed;
-width:200%;
-height:200%;
-background:
-radial-gradient(circle,#00eaff22,transparent),
-radial-gradient(circle,#7b2fff22,transparent);
-animation:bg 20s linear infinite;
-z-index:-1;
+header {
+  text-align:center;
+  padding:14px;
+  background:rgba(20,20,30,.9);
+  backdrop-filter:blur(15px);
+  border-bottom:1px solid rgba(255,255,255,.05);
 }
-
-@keyframes bg{
-0%{transform:translate(0,0)}
-50%{transform:translate(-20%,-20%)}
-100%{transform:translate(0,0)}
+.container {
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
-
-/* Header */
-.header{
-text-align:center;
-padding:25px 10px;
-background:linear-gradient(90deg,#00eaff,#7b2fff);
-font-size:22px;
-font-weight:bold;
+h2 {
+  color:#00f5ff;
+  margin-bottom:10px;
 }
-
-/* Container */
-.container{
-padding:15px;
-max-width:900px;
-margin:auto;
+p {
+  line-height:1.6;
+  font-size:14px;
+  color:#ccc;
 }
-
-h2{
-color:#00eaff;
-margin-top:20px;
+ul {
+  margin-left:20px;
+  list-style-type:disc;
+  color:#ccc;
 }
-
-p{
-line-height:1.6;
-opacity:.85;
-margin:8px 0;
+.menu-bar{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:450px;
+  background:rgba(20,20,30,.9);
+  backdrop-filter:blur(25px);
+  border-radius:35px;
+  display:flex;
+  justify-content:space-around;
+  padding:14px;
 }
-
-/* Contact Info */
-.contact{
-margin-top:20px;
-padding:12px;
-background:rgba(255,255,255,.05);
-border-radius:12px;
+.menu-bar a{
+  color:#888;
+  font-size:22px;
+  flex:1;
+  text-align:center;
+  text-decoration:none;
 }
-
-/* Menu bar */
-.menu{
-position:fixed;
-bottom:12px;
-left:50%;
-transform:translateX(-50%);
-width:92%;
-background:#111;
-display:flex;
-justify-content:space-around;
-padding:12px;
-border-radius:20px;
-box-shadow:0 0 20px #00eaff55;
-}
-.menu i{
-color:white;
-font-size:26px;
-cursor:pointer;
-}
-.active{
-color:#00eaff;
+.menu-bar a.active{
+  color:#00f5ff;
+  transform:translateY(-6px);
 }
 </style>
 </head>
 <body>
 
-<div class="header">Privacy & Policy</div>
+<header>
+<h3>Privacy Policy</h3>
+</header>
 
 <div class="container">
-<h2>Introduction</h2>
-<p>At QWEN-911, we respect your privacy and are committed to protecting the personal information you share with us. This Privacy Policy explains how we collect, use, and safeguard your information when you use our services.</p>
 
-<h2>Information We Collect</h2>
-<p>We may collect personal data such as your email, phone number, and transaction details. This data is collected securely through Firebase services.</p>
+<h2>1. Introduction</h2>
+<p>At QWEN-911, we value your privacy and are committed to protecting your personal information while providing our services.</p>
 
-<h2>Use of Information</h2>
-<p>Your information is used to provide seamless access to chat, streaming, and telecom services, including processing transactions, managing accounts, and enhancing user experience.</p>
+<h2>2. Information We Collect</h2>
+<ul>
+<li>Email addresses and account information.</li>
+<li>Wallet balance and purchase history.</li>
+<li>Usage data for chat and streaming services.</li>
+</ul>
 
-<h2>Data Sharing</h2>
-<p>We do not sell or share your personal information with third parties outside of our service ecosystem. Your data may be shared with our payment providers or telecom partners only to facilitate services.</p>
+<h2>3. How We Use Your Information</h2>
+<ul>
+<li>To provide and improve our services.</li>
+<li>To process payments and manage purchases.</li>
+<li>To communicate updates, alerts, or support responses.</li>
+</ul>
 
-<h2>Security</h2>
-<p>We use industry-standard measures to protect your data, including Firebase security, encryption, and authentication protocols. However, no system is 100% secure.</p>
+<h2>4. Data Sharing</h2>
+<p>We will never sell your personal information. Data may be shared with trusted service providers for operational purposes.</p>
 
-<h2>Your Rights</h2>
-<p>You can update your profile information, review transactions, or delete your account. Contact us for assistance regarding your data.</p>
+<h2>5. Security</h2>
+<p>We store data securely using Firebase. We implement technical and organizational measures to protect your information from unauthorized access.</p>
 
-<h2>Contact Us</h2>
-<div class="contact">
-<p>Email: <strong>kwamemarfo916@gmail.com</strong></p>
-<p>Phone: <strong>0548773937</strong></p>
-<p>We are available to answer any questions or concerns regarding your privacy.</p>
+<h2>6. Cookies and Tracking</h2>
+<p>QWEN-911 may use cookies or similar technologies to improve user experience and monitor platform performance.</p>
+
+<h2>7. User Rights</h2>
+<ul>
+<li>Access, update, or delete your personal information.</li>
+<li>Opt-out of non-essential notifications or communications.</li>
+</ul>
+
+<h2>8. Retention</h2>
+<p>We retain your data only as long as necessary to provide services or comply with legal obligations.</p>
+
+<h2>9. Contact Information</h2>
+<p>For privacy-related questions, you can reach us at <strong>Kwamemarfo916@gmail.com</strong> or call <strong>0548773937</strong>.</p>
+
+<h2>10. Changes to This Policy</h2>
+<p>We may update this Privacy Policy from time to time. Continued use of QWEN-911 constitutes acceptance of the updated policy.</p>
+
 </div>
 
-<h2>Changes to this Policy</h2>
-<p>We may update this Privacy Policy from time to time. Changes will be posted on this page with the date of revision.</p>
+<div class="menu-bar">
+<a href="home.html"><i class="fa-solid fa-house"></i></a>
+<a href="stream.html"><i class="fa-solid fa-video"></i></a>
+<a href="data.html"><i class="fa-solid fa-sim-card"></i></a>
+<a href="chat.html"><i class="fa-solid fa-comments"></i></a>
+<a href="profile.html" class="active"><i class="fa-solid fa-user"></i></a>
 </div>
-
-<!-- Menu Bar -->
-<div class="menu">
-<i class="material-icons" onclick="go('home.html')">home</i>
-<i class="material-icons" onclick="go('stream.html')">videocam</i>
-<i class="material-icons" onclick="go('data.html')">wifi</i>
-<i class="material-icons" onclick="go('chat.html')">chat</i>
-<i class="material-icons" onclick="go('profile.html')">person</i>
-</div>
-
-<script>
-window.go=(p)=>location.href=p;
-</script>
 
 </body>
     </html>
