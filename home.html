@@ -8,7 +8,6 @@
   href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-
     body{
       margin:0;
       font-family:'Inter',sans-serif;
@@ -215,59 +214,74 @@
   <a href="chat.html"><i class="fa-solid fa-comments"></i></a>
   <a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
-  <a href="privacy.html">Privacy and Policy</a>
-  <a href="terms.html">Terms and Conditions</a>
+<a href="privacy.html">Privacy and Policy</a>
+<a href="terms.html">Terms and Conditions</a>
 <a href="https://www.appcreator24.com/app3924197-8jx2c9">download apk</a>
 
 <script type="module">
 
-import { initializeApp } from 
-"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-
-import { getAuth, onAuthStateChanged } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getDatabase, ref, set, onDisconnect, onValue, push } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
   authDomain: "qwen-911.firebaseapp.com",
   projectId: "qwen-911",
+  databaseURL:"https://qwen-911-default-rtdb.firebaseio.com"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
-onAuthStateChanged(auth,(user)=>{
+let onlineRef;
+let username;
 
-  // If NOT logged in → go to login
-  if(!user){
-    window.location.href="login.html";
+/* AUTH + Real-time Online Users */
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "login.html";
     return;
   }
 
-  // ✅ USER EXISTS — record app open
+  username = user.email.split("@")[0];
+
+  // Track app open
   push(ref(db,"analytics/app_opens"),{
     time: Date.now(),
     user: user.email
   });
 
+  // Online Users
+  onlineRef = ref(db, "online/" + username);
+  set(onlineRef, true);
+  onDisconnect(onlineRef).remove();
+
+  onValue(ref(db, "online"), (snapshot) => {
+    const count = snapshot.exists() ? Object.keys(snapshot.val()).length : 0;
+    document.getElementById("users").innerText = count;
+  });
+
 });
 
-/* Live Clock */
 setInterval(()=>{
   document.getElementById("clock").innerHTML =
   new Date().toLocaleTimeString();
 },1000);
 
-/* Animated User Counter */
+/* Animated Uptime (fake demo counter) */
 let count=0;
 setInterval(()=>{
   if(count<1842){
     count+=9;
-    document.getElementById("users").innerText=count;
+    document.getElementById("uptime").innerText=count;
   }
 },30);
 
 </script>
+
 <script type="module" src="analytics.js"></script>
+
 </body>
-                        </html>
+                                                           </html>
