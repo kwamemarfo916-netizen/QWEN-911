@@ -176,7 +176,7 @@ getAuth,onAuthStateChanged,signOut
 from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 import{
-getDatabase,ref,onValue
+getDatabase,ref,onValue,set,update,onDisconnect
 }
 from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
@@ -194,41 +194,97 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
 
-/* AUTH */
+/* ================= AUTH ================= */
+
 onAuthStateChanged(auth,user=>{
 
-if(!user)return location.href="index.html";
+if(!user){
+location.href="index.html";
+return;
+}
 
+/* USER INFO */
 userEmail.textContent=user.email;
 username.textContent=user.email.split("@")[0];
 
-const userRef=ref(db,"users/"+user.uid);
+const userPath="users/"+user.uid;
+const userRef=ref(db,userPath);
 
-onValue(userRef,snap=>{
-if(!snap.exists())return;
-
-const d=snap.val();
-balance.textContent=(d.balance||0).toFixed(2);
-totalBuys.textContent=d.totalBuys||0;
+/* ===== AUTO CREATE USER RECORD ===== */
+set(ref(db,userPath+"/meta"),{
+lastLogin:Date.now()
 });
 
-/* ADMIN ACCESS */
+/* ===== ONLINE STATUS ===== */
+const onlineRef=ref(db,"online/"+user.uid);
+set(onlineRef,{
+email:user.email,
+time:Date.now()
+});
+
+onDisconnect(onlineRef).remove();
+
+/* ===== REALTIME USER DATA ===== */
+onValue(userRef,snap=>{
+
+if(!snap.exists()){
+/* create default user */
+set(userRef,{
+balance:0,
+totalBuys:0,
+createdAt:Date.now()
+});
+return;
+}
+
+const d=snap.val();
+
+balance.textContent=
+Number(d.balance||0).toFixed(2);
+
+totalBuys.textContent=
+d.totalBuys||0;
+
+});
+
+/* ===== ADMIN ACCESS ===== */
 if(user.email===ADMIN_EMAIL){
 adminBtn.classList.remove("hidden");
 }
 
+/* ===== ANALYTICS TRACK ===== */
+if(window.trackEvent){
+trackEvent("profile_open",{
+email:user.email
+});
+}
+
 });
 
-/* BUTTONS */
-adminBtn.onclick=()=>location.href="admin.html";
+/* ================= BUTTONS ================= */
+
+adminBtn.onclick=()=>{
+if(window.trackEvent){
+trackEvent("admin_open_click");
+}
+location.href="admin.html";
+};
 
 logoutBtn.onclick=()=>{
+
+if(auth.currentUser && window.trackEvent){
+trackEvent("logout",{
+email:auth.currentUser.email
+});
+}
+
 signOut(auth).then(()=>{
 location.href="index.html";
 });
 };
 
-</script>
+                                                      </script>
+
   <script type="module" src="analytics.js"></script>
 </body>
   </html>
