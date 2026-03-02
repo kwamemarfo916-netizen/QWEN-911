@@ -45,7 +45,26 @@ color:#00f5ff;
 margin-top:6px;
 }
 
-/* menu bar same as others */
+/* LIVE FEED */
+.feed{
+margin-top:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+max-height:320px;
+overflow:auto;
+font-size:13px;
+color:#ccc;
+}
+
+.feed-item{
+padding:8px;
+border-radius:10px;
+background:rgba(255,255,255,.04);
+border:1px solid rgba(255,255,255,.06);
+}
+
+/* menu bar */
 .menu-bar{
 position:fixed;
 bottom:20px;
@@ -96,6 +115,12 @@ text-decoration:none;
 <div id="views" class="stat">0</div>
 </div>
 
+<!-- LIVE ACTIVITY -->
+<div class="card">
+<div>Live Activity</div>
+<div id="liveFeed" class="feed"></div>
+</div>
+
 </div>
 
 <div class="menu-bar">
@@ -105,22 +130,40 @@ text-decoration:none;
 <a href="chat.html"><i class="fa-solid fa-comments"></i></a>
 <a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
-  <script type="module">
+
+<script type="module">
 
 import { createClient } from
 "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+/* =========================
+   SUPABASE CONNECTION
+========================= */
 
 const supabase = createClient(
 "https://qagawtgfpfupobwuotvw.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg3ODM3Nn0.-ocXPElc-S6aPlqpJBr0-Fvhv8rvaxEDnWKbw5C4dD4"
 );
 
+/* =========================
+   STATS COUNTER
+========================= */
+
+let opens = 0;
+let messages = 0;
+let views = 0;
+
+function updateUI(){
+document.getElementById("opens").textContent = opens;
+document.getElementById("messages").textContent = messages;
+document.getElementById("views").textContent = views;
+}
+
 async function loadStats(){
 
 const { data } =
-await supabase.from("analytics_events").select("event_type");
-
-let opens=0, messages=0, views=0;
+await supabase.from("analytics_events")
+.select("event_type");
 
 data.forEach(e=>{
 if(e.event_type==="APP_OPEN") opens++;
@@ -128,16 +171,86 @@ if(e.event_type==="MESSAGE_SENT") messages++;
 if(e.event_type==="PAGE_VIEW") views++;
 });
 
-document.getElementById("opens").textContent=opens;
-document.getElementById("messages").textContent=messages;
-document.getElementById("views").textContent=views;
+updateUI();
 }
 
 loadStats();
 
-  </script>
+/* =========================
+   LIVE FEED RENDER
+========================= */
+
+function addFeedItem(event){
+
+const feed = document.getElementById("liveFeed");
+
+const row = document.createElement("div");
+row.className="feed-item";
+
+const time =
+new Date(event.created_at)
+.toLocaleTimeString();
+
+row.innerHTML = `
+<b style="color:#00f5ff">${event.username || "guest"}</b>
+→ ${event.event_type}
+<div style="opacity:.6;font-size:11px">${time}</div>
+`;
+
+feed.prepend(row);
+
+/* keep only latest 20 */
+if(feed.children.length>20){
+feed.removeChild(feed.lastChild);
+}
+
+/* update counters realtime */
+if(event.event_type==="APP_OPEN") opens++;
+if(event.event_type==="MESSAGE_SENT") messages++;
+if(event.event_type==="PAGE_VIEW") views++;
+
+updateUI();
+}
+
+/* =========================
+   LOAD INITIAL FEED
+========================= */
+
+async function loadInitialFeed(){
+
+const { data } = await supabase
+.from("analytics_events")
+.select("*")
+.order("created_at",{ascending:false})
+.limit(15);
+
+data.reverse().forEach(addFeedItem);
+}
+
+loadInitialFeed();
+
+/* =========================
+   REALTIME SUBSCRIPTION 🔥
+========================= */
+
+supabase
+.channel("analytics-live")
+.on(
+"postgres_changes",
+{
+event:"INSERT",
+schema:"public",
+table:"analytics_events"
+},
+(payload)=>{
+addFeedItem(payload.new);
+}
+)
+.subscribe();
+
+</script>
 
 <script type="module" src="analytics.js"></script>
 
 </body>
-</html>
+  </html>
