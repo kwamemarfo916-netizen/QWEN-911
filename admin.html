@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QWEN-911 SUPER ADMIN</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<title>QWEN-911 Admin</title>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -14,7 +12,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 body{
 margin:0;
 font-family:Inter,sans-serif;
-background:#05060c;
+background:#070810;
 color:#fff;
 padding-bottom:120px;
 }
@@ -24,13 +22,14 @@ text-align:center;
 padding:14px;
 background:rgba(20,20,30,.9);
 backdrop-filter:blur(15px);
+border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .container{
-padding:12px;
+padding:15px;
 display:flex;
 flex-direction:column;
-gap:12px;
+gap:14px;
 }
 
 .card{
@@ -40,31 +39,13 @@ padding:14px;
 border:1px solid rgba(255,255,255,.08);
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-}
-
 .stat{
 font-size:22px;
 color:#00f5ff;
+margin-top:6px;
 }
 
-input,button{
-width:100%;
-padding:10px;
-margin-top:8px;
-border-radius:12px;
-border:none;
-}
-
-button{
-background:linear-gradient(135deg,#00f5ff,#a855f7);
-font-weight:bold;
-cursor:pointer;
-}
-
+/* menu bar same as others */
 .menu-bar{
 position:fixed;
 bottom:20px;
@@ -77,7 +58,8 @@ backdrop-filter:blur(25px);
 border-radius:35px;
 display:flex;
 justify-content:space-around;
-padding:14px;
+padding:14px 5px;
+box-shadow:0 0 20px rgba(0,245,255,.3);
 }
 
 .menu-bar a{
@@ -94,47 +76,28 @@ text-decoration:none;
 <body>
 
 <header>
-<h3>SUPER ADMIN CONTROL</h3>
+<h3>Admin Dashboard</h3>
 </header>
 
 <div class="container">
 
-<!-- STATS -->
-<div class="card grid">
-<div>Users<br><span class="stat" id="usersCount">0</span></div>
-<div>Online<br><span class="stat" id="onlineCount">0</span></div>
-<div>Revenue ₵<br><span class="stat" id="revenue">0</span></div>
-<div>Transactions<br><span class="stat" id="txCount">0</span></div>
-</div>
-
-<!-- CHART -->
 <div class="card">
-<canvas id="revenueChart"></canvas>
+<div>Total App Opens</div>
+<div id="opens" class="stat">0</div>
 </div>
 
-<!-- USER CONTROL -->
 <div class="card">
-<h4>User Control</h4>
-<input id="uid" placeholder="User UID">
-<input id="amount" placeholder="Amount">
-<button id="addBal">Add Balance</button>
-<button id="deductBal">Deduct Balance</button>
+<div>Total Messages Sent</div>
+<div id="messages" class="stat">0</div>
 </div>
 
-<!-- PLATFORM CONTROL -->
 <div class="card">
-<h4>Platform Controls</h4>
-
-<button id="maintenanceBtn">Toggle Maintenance Mode</button>
-<button id="disableChatBtn">Toggle Chat</button>
-
-<input id="announcement" placeholder="Broadcast message">
-<button id="broadcast">Send Announcement</button>
+<div>Total Page Views</div>
+<div id="views" class="stat">0</div>
 </div>
 
 </div>
 
-<!-- FLOAT MENU -->
 <div class="menu-bar">
 <a href="home.html"><i class="fa-solid fa-house"></i></a>
 <a href="stream.html"><i class="fa-solid fa-video"></i></a>
@@ -142,128 +105,39 @@ text-decoration:none;
 <a href="chat.html"><i class="fa-solid fa-comments"></i></a>
 <a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
-  <a href="privacy.html">Privacy and Policy</a>
-  <a href="terms.html">Terms and Conditions</a>
+  <script type="module">
 
-<script type="module">
+import { createClient } from
+"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-import{initializeApp}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+const supabase = createClient(
+"https://qagawtgfpfupobwuotvw.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg3ODM3Nn0.-ocXPElc-S6aPlqpJBr0-Fvhv8rvaxEDnWKbw5C4dD4"
+);
 
-import{
-getAuth,onAuthStateChanged
-}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+async function loadStats(){
 
-import{
-getDatabase,ref,onValue,update,push,set
-}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+const { data } =
+await supabase.from("analytics_events").select("event_type");
 
-const firebaseConfig={
-apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
-authDomain:"qwen-911.firebaseapp.com",
-databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
-projectId:"qwen-911"
-};
+let opens=0, messages=0, views=0;
 
-const ADMIN="kwamemarfo916@gmail.com";
-
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
-
-/* ADMIN LOCK */
-onAuthStateChanged(auth,user=>{
-if(!user||user.email!==ADMIN)
-location.href="home.html";
+data.forEach(e=>{
+if(e.event_type==="APP_OPEN") opens++;
+if(e.event_type==="MESSAGE_SENT") messages++;
+if(e.event_type==="PAGE_VIEW") views++;
 });
 
-/* LIVE USERS */
-onValue(ref(db,"users"),snap=>{
-if(!snap.exists())return;
-
-let users=snap.val();
-usersCount.textContent=Object.keys(users).length;
-
-let revenue=0,tx=0;
-
-Object.values(users).forEach(u=>{
-revenue+=u.totalSpent||0;
-tx+=u.totalBuys||0;
-});
-
-revenueEl(revenue,tx);
-});
-
-function revenueEl(rev,tx){
-revenue.textContent=rev.toFixed(2);
-txCount.textContent=tx;
-updateChart(rev);
+document.getElementById("opens").textContent=opens;
+document.getElementById("messages").textContent=messages;
+document.getElementById("views").textContent=views;
 }
 
-/* ONLINE */
-onValue(ref(db,"online"),snap=>{
-onlineCount.textContent=
-snap.exists()?Object.keys(snap.val()).length:0;
-});
+loadStats();
 
-/* BALANCE CONTROL */
-addBal.onclick=()=>{
-update(ref(db,"users/"+uid.value),{
-balance:parseFloat(amount.value)
-});
-logAdmin("Added balance");
-};
+  </script>
 
-deductBal.onclick=()=>{
-update(ref(db,"users/"+uid.value),{balance:0});
-logAdmin("Removed balance");
-};
-
-/* BROADCAST */
-broadcast.onclick=()=>{
-push(ref(db,"announcements"),{
-text:announcement.value,
-time:Date.now()
-});
-announcement.value="";
-};
-
-/* PLATFORM TOGGLES */
-maintenanceBtn.onclick=()=>{
-set(ref(db,"settings/maintenance"),true);
-};
-
-disableChatBtn.onclick=()=>{
-set(ref(db,"settings/chatDisabled"),true);
-};
-
-/* ADMIN LOG */
-function logAdmin(action){
-push(ref(db,"adminLogs"),{
-action,
-time:Date.now()
-});
-}
-
-/* CHART */
-const ctx=document.getElementById("revenueChart");
-const chart=new Chart(ctx,{
-type:"line",
-data:{
-labels:["Now"],
-datasets:[{data:[0]}]
-}
-});
-
-function updateChart(val){
-chart.data.datasets[0].data.push(val);
-chart.data.labels.push("");
-chart.update();
-}
-
-</script>
 <script type="module" src="analytics.js"></script>
+
 </body>
-  </html>
+</html>
