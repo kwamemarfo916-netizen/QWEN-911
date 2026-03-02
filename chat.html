@@ -211,7 +211,16 @@ text-decoration:none
 color:#00f5ff;
 transform:translateY(-6px)
 }
+/* AUTO HIDE ANIMATION */
+.top-menu{
+transition:transform .35s ease, opacity .35s ease;
+}
 
+.top-menu.hide{
+transform:translate(-50%,-80px);
+opacity:0;
+pointer-events:none;
+  }
 </style>
 </head>
 
@@ -480,7 +489,28 @@ m.innerText.toLowerCase().includes(val)
 };
 
 });
+/* ================= AUTO HIDE TOP MENU ================= */
 
+const topMenu = document.querySelector(".top-menu");
+
+let lastScroll = 0;
+
+document.getElementById("messages")
+.addEventListener("scroll", () => {
+
+  const currentScroll =
+  document.getElementById("messages").scrollTop;
+
+  if(currentScroll > lastScroll && currentScroll > 40){
+      // scrolling DOWN → hide
+      topMenu.classList.add("hide");
+  }else{
+      // scrolling UP → show
+      topMenu.classList.remove("hide");
+  }
+
+  lastScroll = currentScroll;
+});
 </script>
   <script type="module" src="analytics.js"></script>
 </body>
