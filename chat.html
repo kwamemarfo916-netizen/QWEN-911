@@ -221,11 +221,47 @@ transform:translate(-50%,-80px);
 opacity:0;
 pointer-events:none;
   }
+  .top-menu{
+position:fixed;
+top:12px;
+left:50%;
+transform:translateX(-50%);
+z-index:9999;
+
+display:flex;
+gap:18px;
+
+padding:8px 18px;
+border-radius:25px;
+
+background:rgba(20,20,30,.85);
+backdrop-filter:blur(20px);
+box-shadow:0 0 15px rgba(0,245,255,.25);
+
+font-size:13px;
+}
+
+.top-menu a{
+color:#00f5ff;
+text-decoration:none;
+opacity:.85;
+transition:.25s;
+}
+
+.top-menu a:hover{
+opacity:1;
+color:#a855f7;
+  }
 </style>
 </head>
 
 <body>
-
+  <!-- TOP FLOATING MENU -->
+<div class="top-menu">
+  <a href="group.html">Group Chat</a>
+  <a href="streams.html">Video Streams</a>
+  <a href="campaigns.html">Campaigns</a>
+  </div>
 <header>
 CHAT LEVEL MAX
 <div class="online">
@@ -491,25 +527,29 @@ m.innerText.toLowerCase().includes(val)
 });
 /* ================= AUTO HIDE TOP MENU ================= */
 
-const topMenu = document.querySelector(".top-menu");
+window.addEventListener("DOMContentLoaded",()=>{
 
-let lastScroll = 0;
+const topMenu=document.querySelector(".top-menu");
+const messages=document.getElementById("messages");
 
-document.getElementById("messages")
-.addEventListener("scroll", () => {
+if(!topMenu || !messages) return;
 
-  const currentScroll =
-  document.getElementById("messages").scrollTop;
+let lastScroll=0;
 
-  if(currentScroll > lastScroll && currentScroll > 40){
-      // scrolling DOWN → hide
-      topMenu.classList.add("hide");
-  }else{
-      // scrolling UP → show
-      topMenu.classList.remove("hide");
-  }
+messages.addEventListener("scroll",()=>{
 
-  lastScroll = currentScroll;
+const currentScroll=messages.scrollTop;
+
+if(currentScroll>lastScroll && currentScroll>40){
+topMenu.classList.add("hide");
+}else{
+topMenu.classList.remove("hide");
+}
+
+lastScroll=currentScroll;
+
+});
+
 });
 </script>
   <script type="module" src="analytics.js"></script>
