@@ -255,219 +255,181 @@ Online Users: <span id="onlineCount">0</span>
 
 <script type="module">
 
-import{initializeApp}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, set, onDisconnect, remove, update, onValue } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-import{getAuth,onAuthStateChanged}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-import{
-getDatabase,ref,push,onChildAdded,set,onDisconnect,
-remove,update,onValue
-}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-/* FIREBASE CONFIG */
-const firebaseConfig={
-apiKey:"YOUR_API_KEY",
-authDomain:"qwen-911.firebaseapp.com",
-databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
-projectId:"qwen-911"
+const firebaseConfig = {
+  apiKey: "your key",
+  authDomain: "qwen-911.firebaseapp.com",
+  databaseURL: "https://qwen-911-default-rtdb.firebaseio.com",
+  projectId: "qwen-911"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-const box=document.getElementById("messages");
+const box = document.getElementById("messages");
+let username = "";
+let userProfile = { displayName: "", photo: "" };
+let mediaRecorder = null;
+let audioChunks = [];
+let recordTimeout = null;
 
-onAuthStateChanged(auth,user=>{
-if(!user)location.href="login.html";
+/* ================= AUTH ================= */
+onAuthStateChanged(auth, user => {
+  if (!user) return location.href = "login.html";
+  username = user.email.split("@")[0];
 
-const username=user.email.split("@")[0];
-let userProfile={};
+  /* Load profile data */
+  onValue(ref(db, "users/" + username), snap => {
+    if (snap.exists()) userProfile = snap.val();
+  });
 
-/* LOAD PROFILE */
-onValue(ref(db,"users/"+username),snap=>{
-if(snap.exists()) userProfile=snap.val();
-});
+  /* Online status */
+  const onlineRef = ref(db, "online/" + username);
+  set(onlineRef, true);
+  onDisconnect(onlineRef).remove();
 
-/* ONLINE */
-const onlineRef=ref(db,"online/"+username);
-set(onlineRef,true);
-onDisconnect(onlineRef).remove();
+  onValue(ref(db, "online"), snap => {
+    onlineCount.textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+  });
 
-onValue(ref(db,"online"),snap=>{
-onlineCount.textContent=
-snap.exists()?Object.keys(snap.val()).length:0;
-});
+  /* ===== SEND TEXT ===== */
+  function send() {
+    const text = messageInput.value.trim();
+    if (!text) return;
+    push(ref(db, "messages"), {
+      type: "text",
+      text,
+      user: username,
+      displayName: userProfile.displayName || username,
+      photo: userProfile.photo || "",
+      time: Date.now(),
+      reactions: {},
+      seen: false
+    });
+    messageInput.value = "";
+  }
+  sendBtn.onclick = send;
+  messageInput.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-/* SEND TEXT */
-function send(){
-const text=messageInput.value.trim();
-if(!text)return;
+  /* ===== SEND IMAGE ===== */
+  imgBtn.onclick = () => imgInput.click();
+  imgInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      push(ref(db, "messages"), {
+        type: "image",
+        image: reader.result,
+        user: username,
+        displayName: userProfile.displayName || username,
+        photo: userProfile.photo || "",
+        time: Date.now(),
+        reactions: {},
+        seen: false
+      });
+    };
+    reader.readAsDataURL(file);
+  };
 
-push(ref(db,"messages"),{
-type:"text",
-text,
-user:username,
-displayName:userProfile.displayName||username,
-photo:userProfile.photo||"",
-time:Date.now(),
-reactions:{},
-seen:false
-});
+  /* ===== VOICE RECORDING LONG PRESS ===== */
+  voiceBtn.addEventListener("mousedown", async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    mediaRecorder.start();
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    recordTimeout = setTimeout(() => { stopRecording(); }, 6000);
+  });
 
-messageInput.value="";
-}
+  voiceBtn.addEventListener("mouseup", stopRecording);
+  voiceBtn.addEventListener("mouseleave", stopRecording);
 
-sendBtn.onclick=send;
-messageInput.addEventListener("keydown",e=>{
-if(e.key==="Enter")send();
-});
+  function stopRecording() {
+    clearTimeout(recordTimeout);
+    if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+  }
 
-/* IMAGE */
-imgBtn.onclick=()=>imgInput.click();
-imgInput.onchange=e=>{
-const file=e.target.files[0];
-if(!file)return;
-const reader=new FileReader();
-reader.onload=()=>{
-push(ref(db,"messages"),{
-type:"image",
-image:reader.result,
-user:username,
-displayName:userProfile.displayName||username,
-photo:userProfile.photo||"",
-time:Date.now(),
-reactions:{},
-seen:false
-});
-};
-reader.readAsDataURL(file);
-};
+  if (window.MediaRecorder) voiceBtn.onclick = null;
 
-/* VOICE */
-let mediaRecorder;
-let audioChunks=[];
-let recordTimeout;
+  if (window.MediaRecorder) {
+    document.addEventListener("mouseup", stopRecording);
+    document.addEventListener("mouseleave", stopRecording);
+  }
 
-voiceBtn.onmousedown=async()=>{
-const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-mediaRecorder=new MediaRecorder(stream);
-mediaRecorder.start();
-audioChunks=[];
+  function handleVoiceStop() {
+    const blob = new Blob(audioChunks, { type: "audio/webm" });
+    const reader = new FileReader();
+    reader.onload = () => {
+      push(ref(db, "messages"), {
+        type: "voice",
+        voice: reader.result,
+        user: username,
+        displayName: userProfile.displayName || username,
+        photo: userProfile.photo || "",
+        time: Date.now(),
+        reactions: {},
+        seen: false
+      });
+    };
+    reader.readAsDataURL(blob);
+  }
 
-mediaRecorder.ondataavailable=e=>{
-audioChunks.push(e.data);
-};
+  /* Attach stop handler */
+  if (window.MediaRecorder) {
+    const originalOnStop = mediaRecorder?.onstop;
+    mediaRecorder && (mediaRecorder.onstop = () => { handleVoiceStop(); if (originalOnStop) originalOnStop(); });
+  }
 
-recordTimeout=setTimeout(()=>{
-mediaRecorder.stop();
-},6000);
-};
+  /* ===== LOAD MESSAGES ===== */
+  onChildAdded(ref(db, "messages"), snap => {
+    const m = snap.val();
+    const key = snap.key;
+    const div = document.createElement("div");
+    div.className = "msg " + (m.user === username ? "sent" : "received");
 
-voiceBtn.onmouseup=()=>{
-clearTimeout(recordTimeout);
-if(mediaRecorder && mediaRecorder.state!=="inactive"){
-mediaRecorder.stop();
-}
-};
+    const label = document.createElement("div");
+    label.className = "user-label";
+    label.innerHTML = `
+      <img src="${m.photo || 'https://i.imgur.com/6VBx3io.png'}">
+      ${m.displayName || m.user}
+    `;
+    div.appendChild(label);
 
-voiceBtn.addEventListener("mouseleave",()=>{
-if(mediaRecorder && mediaRecorder.state==="recording"){
-mediaRecorder.stop();
-}
-});
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
 
-if(window.MediaRecorder){
-voiceBtn.onclick=null;
-}
+    bubble.innerHTML = `
+      ${m.type === "text" ? m.text : ""}
+      ${m.type === "image" ? '<img src="' + m.image + '" style="width:100%;border-radius:10px;margin-top:6px">' : ""}
+      ${m.type === "voice" ? '<audio controls style="width:100%;margin-top:6px"><source src="' + m.voice + '"></audio>' : ""}
+      <div class="react">${m.reactions ? Object.values(m.reactions).join(" ") : ""}</div>
+      <div class="time">
+        ${new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        ${m.user === username ? '<span class="ticks">' + (m.seen ? '✓✓' : '✓') + '</span>' : ""}
+      </div>
+    `;
 
-document.addEventListener("mouseup",()=>{
-if(mediaRecorder && mediaRecorder.state==="recording"){
-mediaRecorder.stop();
-}
-});
+    bubble.oncontextmenu = e => {
+      e.preventDefault();
+      if (confirm("Delete message?") && m.user === username) {
+        remove(ref(db, "messages/" + key));
+        div.remove();
+      }
+    };
 
-function handleVoiceStop(){
-const blob=new Blob(audioChunks,{type:"audio/webm"});
-const reader=new FileReader();
-reader.onload=()=>{
-push(ref(db,"messages"),{
-type:"voice",
-voice:reader.result,
-user:username,
-displayName:userProfile.displayName||username,
-photo:userProfile.photo||"",
-time:Date.now(),
-reactions:{},
-seen:false
-});
-};
-reader.readAsDataURL(blob);
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-if(mediaRecorder){
-mediaRecorder.onstop=handleVoiceStop;
-}
-});
-
-/* LOAD MESSAGES */
-onChildAdded(ref(db,"messages"),snap=>{
-
-const m=snap.val();
-const key=snap.key;
-
-const div=document.createElement("div");
-div.className="msg "+(m.user===username?"sent":"received");
-
-const label=document.createElement("div");
-label.className="user-label";
-label.innerHTML=`
-<img src="${m.photo||'https://i.imgur.com/6VBx3io.png'}">
-${m.displayName||m.user}
-`;
-div.appendChild(label);
-
-const bubble=document.createElement("div");
-bubble.className="bubble";
-
-bubble.innerHTML=`
-
-${m.type==="text"?m.text:""}
-
-${m.type==="image"?
-'<img src="'+m.image+'" style="width:100%;border-radius:10px;margin-top:6px">':""}
-
-${m.type==="voice"?
-'<audio controls style="width:100%;margin-top:6px"><source src="'+m.voice+'"></audio>':""}
-
-<div class="react">${m.reactions?Object.values(m.reactions).join(" "):""}</div>
-
-<div class="time">
-${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
-${m.user===username?'<span class="ticks">'+(m.seen?'✓✓':'✓')+'</span>':""}
-</div>
-`;
-
-bubble.oncontextmenu=e=>{
-e.preventDefault();
-if(confirm("Delete message?") && m.user===username){
-remove(ref(db,"messages/"+key));
-div.remove();
-}
-};
-
-div.appendChild(bubble);
-box.appendChild(div);
-box.scrollTop=box.scrollHeight;
+    div.appendChild(bubble);
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  });
 
 });
 
-});
-
-</script>
+</script>scriptript>
 
 <script type="module" src="analytics.js"></script>
 
