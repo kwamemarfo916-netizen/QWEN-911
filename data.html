@@ -1,52 +1,63 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE html><html>
 <head>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QWEN-911 Data Bundles</title>
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-<style>
-
+<title>QWEN-911 Data Bundles</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><style>
 body{
 margin:0;
 font-family:Inter,sans-serif;
-background:#070912;
+background:linear-gradient(180deg,#0f172a,#020617);
 color:#fff;
 padding-bottom:120px;
 }
 
 header{
-text-align:center;
+padding:20px;
+background:linear-gradient(135deg,#1e293b,#0f172a);
+border-bottom-left-radius:25px;
+border-bottom-right-radius:25px;
+box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+header h3{margin:0;font-size:18px;opacity:.8}
+
+.balance-box{
+margin-top:10px;
+background:linear-gradient(135deg,#00f5ff,#a855f7);
 padding:14px;
-background:rgba(20,20,30,.9);
-backdrop-filter:blur(15px);
+border-radius:18px;
+color:#000;
+font-weight:bold;
+font-size:18px;
 }
 
 .container{
-padding:12px;
+padding:16px;
 display:flex;
 flex-direction:column;
-gap:14px;
+gap:18px;
 }
 
-/* NETWORK CARDS */
+.section-title{
+font-size:14px;
+opacity:.7;
+margin-bottom:8px;
+}
 
 .networks{
-display:flex;
-gap:10px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
 }
 
 .net{
-flex:1;
-padding:14px;
-border-radius:14px;
+padding:16px;
+border-radius:16px;
 text-align:center;
-background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);
-cursor:pointer;
+background:#111827;
+border:1px solid rgba(255,255,255,.05);
+font-weight:600;
 transition:.3s;
+cursor:pointer;
 }
 
 .net.active{
@@ -54,20 +65,19 @@ background:linear-gradient(135deg,#00f5ff,#a855f7);
 color:#000;
 }
 
-/* AMOUNTS */
-
 .amounts{
 display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
 }
 
 .amount{
-padding:12px;
+padding:16px;
+border-radius:16px;
+background:#111827;
 text-align:center;
-border-radius:12px;
-background:rgba(255,255,255,.05);
 cursor:pointer;
+transition:.3s;
 }
 
 .amount.active{
@@ -75,17 +85,29 @@ background:#00f5ff;
 color:#000;
 }
 
-.card{
-background:rgba(255,255,255,.05);
+.input-box{
+background:#111827;
 padding:14px;
-border-radius:14px;
+border-radius:16px;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+
+.input-box input{
+padding:12px;
+border:none;
+border-radius:12px;
+background:#0f172a;
+color:#fff;
+font-size:14px;
 }
 
 .buyBtn{
-width:100%;
-padding:14px;
+margin-top:10px;
+padding:16px;
 border:none;
-border-radius:14px;
+border-radius:20px;
 background:linear-gradient(135deg,#00f5ff,#a855f7);
 font-size:16px;
 font-weight:bold;
@@ -97,17 +119,19 @@ position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%) scale(0);
-background:#111;
-padding:20px;
-border-radius:16px;
+background:#0f172a;
+padding:25px;
+border-radius:20px;
 text-align:center;
 transition:.4s;
+box-shadow:0 20px 60px rgba(0,0,0,.5);
 }
 
 .showReceipt{
 transform:translate(-50%,-50%) scale(1);
 }
 
+/* DO NOT TOUCH MENU BAR */
 .menu-bar{
 position:fixed;
 bottom:20px;
@@ -136,29 +160,21 @@ color:#00f5ff;
 transform:translateY(-6px);
 }
 
-</style>
-</head>
-
-<body>
-
-<header>
-<h3>Buy Data Bundle</h3>
+</style></head><body><header>
+<h3>Data Payment</h3>
+<div class="balance-box">
 Balance: ₵<span id="balance">0</span>
-</header>
-
-<div class="container">
-
-<div class="card">
-<h4>Select Network</h4>
+</div>
+</header><div class="container"><div>
+<div class="section-title">Select Network</div>
 <div class="networks">
 <div class="net" data-net="MTN">MTN</div>
 <div class="net" data-net="Telecel">Telecel</div>
-<div class="net" data-net="AirtelTigo">AT</div>
+<div class="net" data-net="AirtelTigo">AirtelTigo</div>
+<div class="net" data-net="GLO">GLO</div>
 </div>
-</div>
-
-<div class="card">
-<h4>Select Bundle</h4>
+</div><div>
+<div class="section-title">Select Bundle</div>
 <div class="amounts">
 <div class="amount">1GB - ₵5</div>
 <div class="amount">2GB - ₵10</div>
@@ -167,46 +183,32 @@ Balance: ₵<span id="balance">0</span>
 <div class="amount">20GB - ₵60</div>
 <div class="amount">50GB - ₵120</div>
 </div>
+</div><div>
+<div class="section-title">Payment Number</div>
+<div class="input-box">
+<input type="tel" id="payerNumber" placeholder="Enter number to pay from">
 </div>
-
-<button class="buyBtn" id="buyBtn">
-Buy Bundle
-</button>
-
+</div><div>
+<div class="section-title">Receiving Number</div>
+<div class="input-box">
+<input type="tel" id="receiverNumber" placeholder="Enter number to receive data">
 </div>
+</div><button class="buyBtn" id="buyBtn">Confirm Payment</button>
 
-<div id="receipt">
+</div><div id="receipt">
 <h3>✅ Purchase Successful</h3>
 <p id="receiptText"></p>
-</div>
-
-<!-- MENU -->
-<div class="menu-bar">
+</div><!-- MENU (UNCHANGED) --><div class="menu-bar">
 <a href="home.html"><i class="fa-solid fa-house"></i></a>
 <a href="stream.html"><i class="fa-solid fa-video"></i></a>
 <a href="data.html" class="active"><i class="fa-solid fa-sim-card"></i></a>
 <a href="chat.html"><i class="fa-solid fa-comments"></i></a>
 <a href="profile.html"><i class="fa-solid fa-user"></i></a>
-</div>
-   <a href="privacy.html">Privacy and Policy</a>
-  <a href="terms.html">Terms and Conditions</a>
+</div><script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import{getDatabase,ref,onValue,update,push,get}from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-<script type="module">
-
-import{initializeApp}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-
-import{
-getAuth,onAuthStateChanged
-}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-import{
-getDatabase,ref,onValue,update,push,get
-}
-from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-/* FIREBASE */
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
@@ -223,44 +225,38 @@ let selectedAmount=null;
 let price=0;
 let uid;
 
-/* AUTH */
 onAuthStateChanged(auth,user=>{
 if(!user)return location.href="login.html";
 uid=user.uid;
 
-/* LOAD BALANCE */
 onValue(ref(db,"users/"+uid+"/balance"),snap=>{
 balance.textContent=snap.val()||0;
 });
 });
 
-/* SELECT NETWORK */
 document.querySelectorAll(".net").forEach(n=>{
 n.onclick=()=>{
-document.querySelectorAll(".net")
-.forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".net").forEach(x=>x.classList.remove("active"));
 n.classList.add("active");
 selectedNet=n.dataset.net;
 };
 });
 
-/* SELECT AMOUNT */
 document.querySelectorAll(".amount").forEach(a=>{
 a.onclick=()=>{
-document.querySelectorAll(".amount")
-.forEach(x=>x.classList.remove("active"));
+document.querySelectorAll(".amount").forEach(x=>x.classList.remove("active"));
 a.classList.add("active");
-
 selectedAmount=a.innerText.split("-")[0];
 price=parseFloat(a.innerText.split("₵")[1]);
 };
 });
 
-/* BUY */
 buyBtn.onclick=async()=>{
+const payer=payerNumber.value.trim();
+const receiver=receiverNumber.value.trim();
 
-if(!selectedNet||!price)
-return alert("Select bundle");
+if(!selectedNet||!price||!payer||!receiver)
+return alert("Complete all fields");
 
 const balSnap=await get(ref(db,"users/"+uid+"/balance"));
 let bal=balSnap.val()||0;
@@ -270,33 +266,26 @@ return alert("Insufficient balance");
 
 let newBal=bal-price;
 
-/* UPDATE USER */
 update(ref(db,"users/"+uid),{
-balance:newBal,
-totalSpent:(balSnap.val()?.totalSpent||0)+price,
-totalBuys:(balSnap.val()?.totalBuys||0)+1
+balance:newBal
 });
 
-/* SAVE PURCHASE */
 push(ref(db,"purchases"),{
 uid,
 network:selectedNet,
 bundle:selectedAmount,
 price,
+payerNumber:payer,
+receiverNumber:receiver,
 time:Date.now()
 });
 
-/* RECEIPT */
-receiptText.innerText=
-`${selectedNet} ${selectedAmount} purchased`;
-
+receiptText.innerText=`${selectedNet} ${selectedAmount} sent to ${receiver}`;
 receipt.classList.add("showReceipt");
 
 setTimeout(()=>{
 receipt.classList.remove("showReceipt");
 },2500);
-body
-</script>
-<script type="module" src="analytics.js"></script>
-</body>
+};
+</script></body>
    </html>
