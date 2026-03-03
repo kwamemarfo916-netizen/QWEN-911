@@ -142,22 +142,32 @@ import { createClient } from
 
 const supabase = createClient(
 "https://qagawtgfpfupobwuotvw.supabase.co",
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg3ODM3Nn0.-ocXPElc-S6aPlqpJBr0-Fvhv8rvaxEDnWKbw5C4dD4"
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg"
 );
 
 /* =========================
-   STATS COUNTER
+   STATS COUNTERS
 ========================= */
 
-let opens = 0;
-let messages = 0;
-let views = 0;
+let stats = {
+APP_OPEN:0,
+MESSAGE_SENT:0,
+PAGE_VIEW:0,
+DATA_PURCHASE:0,
+WALLET_TOPUP:0,
+STREAM_JOIN:0,
+PROFILE_VIEW:0
+};
 
 function updateUI(){
-document.getElementById("opens").textContent = opens;
-document.getElementById("messages").textContent = messages;
-document.getElementById("views").textContent = views;
+document.getElementById("opens").textContent = stats.APP_OPEN;
+document.getElementById("messages").textContent = stats.MESSAGE_SENT;
+document.getElementById("views").textContent = stats.PAGE_VIEW;
 }
+
+/* =========================
+   LOAD ALL STATS
+========================= */
 
 async function loadStats(){
 
@@ -166,9 +176,9 @@ await supabase.from("analytics_events")
 .select("event_type");
 
 data.forEach(e=>{
-if(e.event_type==="APP_OPEN") opens++;
-if(e.event_type==="MESSAGE_SENT") messages++;
-if(e.event_type==="PAGE_VIEW") views++;
+if(stats[e.event_type] !== undefined){
+stats[e.event_type]++;
+}
 });
 
 updateUI();
@@ -204,12 +214,12 @@ if(feed.children.length>20){
 feed.removeChild(feed.lastChild);
 }
 
-/* update counters realtime */
-if(event.event_type==="APP_OPEN") opens++;
-if(event.event_type==="MESSAGE_SENT") messages++;
-if(event.event_type==="PAGE_VIEW") views++;
-
+/* update stat live */
+if(stats[event.event_type] !== undefined){
+stats[event.event_type]++;
 updateUI();
+}
+
 }
 
 /* =========================
@@ -222,7 +232,7 @@ const { data } = await supabase
 .from("analytics_events")
 .select("*")
 .order("created_at",{ascending:false})
-.limit(15);
+.limit(20);
 
 data.reverse().forEach(addFeedItem);
 }
@@ -230,7 +240,7 @@ data.reverse().forEach(addFeedItem);
 loadInitialFeed();
 
 /* =========================
-   REALTIME SUBSCRIPTION 🔥
+   REALTIME SUBSCRIPTION
 ========================= */
 
 supabase
@@ -249,7 +259,6 @@ addFeedItem(payload.new);
 .subscribe();
 
 </script>
-
 <script type="module" src="analytics.js"></script>
 
 </body>
