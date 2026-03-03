@@ -84,6 +84,16 @@ font-size:9px;
 color:#8b8b9f;
 margin-bottom:3px;
 letter-spacing:.5px;
+display:flex;
+align-items:center;
+gap:5px;
+}
+
+.user-label img{
+width:14px;
+height:14px;
+border-radius:50%;
+object-fit:cover;
 }
 
 /* bubbles */
@@ -110,7 +120,6 @@ background:rgba(255,255,255,.05);
 border:1px solid rgba(255,255,255,.07);
 }
 
-/* reply preview */
 .reply-preview{
 font-size:10px;
 background:rgba(255,255,255,.06);
@@ -121,14 +130,12 @@ border-radius:8px;
 opacity:.9;
 }
 
-/* reactions */
 .react{
 font-size:12px;
 margin-top:4px;
 opacity:.9;
 }
 
-/* time */
 .time{
 font-size:9px;
 opacity:.65;
@@ -181,7 +188,7 @@ padding-left:15px;
 height:16px;
 }
 
-/* ===== MENU BAR (UNCHANGED AS REQUESTED) ===== */
+/* ===== MENU BAR (UNCHANGED) ===== */
 
 .menu-bar{
 position:fixed;
@@ -211,57 +218,12 @@ text-decoration:none
 color:#00f5ff;
 transform:translateY(-6px)
 }
-/* AUTO HIDE ANIMATION */
-.top-menu{
-transition:transform .35s ease, opacity .35s ease;
-}
 
-.top-menu.hide{
-transform:translate(-50%,-80px);
-opacity:0;
-pointer-events:none;
-  }
-  .top-menu{
-position:fixed;
-top:12px;
-left:50%;
-transform:translateX(-50%);
-z-index:9999;
-
-display:flex;
-gap:18px;
-
-padding:8px 18px;
-border-radius:25px;
-
-background:rgba(20,20,30,.85);
-backdrop-filter:blur(20px);
-box-shadow:0 0 15px rgba(0,245,255,.25);
-
-font-size:13px;
-}
-
-.top-menu a{
-color:#00f5ff;
-text-decoration:none;
-opacity:.85;
-transition:.25s;
-}
-
-.top-menu a:hover{
-opacity:1;
-color:#a855f7;
-  }
 </style>
 </head>
 
 <body>
-  <!-- TOP FLOATING MENU -->
-<div class="top-menu">
-  <a href="group.html">Group Chat</a>
-  <a href="streams.html">Video Streams</a>
-  <a href="campaigns.html">Campaigns</a>
-  </div>
+
 <header>
 CHAT LEVEL MAX
 <div class="online">
@@ -277,11 +239,12 @@ Online Users: <span id="onlineCount">0</span>
 <div class="input-area">
 <input type="file" id="imgInput" hidden>
 <button class="btn" id="imgBtn"><i class="fa fa-image"></i></button>
+<button class="btn" id="voiceBtn"><i class="fa fa-microphone"></i></button>
 <button class="btn" id="sendBtn"><i class="fa fa-paper-plane"></i></button>
 <input id="messageInput" placeholder="Type message...">
 </div>
 
-<!-- MENU BAR NOT MODIFIED -->
+<!-- MENU BAR UNTOUCHED -->
 <div class="menu-bar">
 <a href="home.html"><i class="fa-solid fa-house"></i></a>
 <a href="stream.html"><i class="fa-solid fa-video"></i></a>
@@ -303,10 +266,9 @@ getDatabase,ref,push,onChildAdded,set,onDisconnect,
 remove,update,onValue
 }from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-/* ================= FIREBASE ================= */
-
+/* FIREBASE CONFIG */
 const firebaseConfig={
-apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
+apiKey:"YOUR_API_KEY",
 authDomain:"qwen-911.firebaseapp.com",
 databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
 projectId:"qwen-911"
@@ -318,19 +280,18 @@ const db=getDatabase(app);
 
 const box=document.getElementById("messages");
 
-let replyTo=null;
-let lastSender=null;
-let typingTimeout;
-
-/* ================= AUTH ================= */
-
 onAuthStateChanged(auth,user=>{
 if(!user)location.href="login.html";
 
 const username=user.email.split("@")[0];
+let userProfile={};
 
-/* ===== ONLINE COUNT ===== */
+/* LOAD PROFILE */
+onValue(ref(db,"users/"+username),snap=>{
+if(snap.exists()) userProfile=snap.val();
+});
 
+/* ONLINE */
 const onlineRef=ref(db,"online/"+username);
 set(onlineRef,true);
 onDisconnect(onlineRef).remove();
@@ -340,67 +301,44 @@ onlineCount.textContent=
 snap.exists()?Object.keys(snap.val()).length:0;
 });
 
-/* ===== SEND MESSAGE ===== */
-
+/* SEND TEXT */
 function send(){
 const text=messageInput.value.trim();
 if(!text)return;
 
 push(ref(db,"messages"),{
+type:"text",
 text,
 user:username,
+displayName:userProfile.displayName||username,
+photo:userProfile.photo||"",
 time:Date.now(),
-reply:replyTo,
 reactions:{},
 seen:false
 });
 
 messageInput.value="";
-replyTo=null;
-removeReplyPreview();
 }
 
 sendBtn.onclick=send;
-
 messageInput.addEventListener("keydown",e=>{
 if(e.key==="Enter")send();
 });
 
-/* ===== TYPING ===== */
-
-messageInput.oninput=()=>{
-set(ref(db,"typing/"+username),true);
-
-clearTimeout(typingTimeout);
-typingTimeout=setTimeout(()=>{
-remove(ref(db,"typing/"+username));
-},1200);
-};
-
-onValue(ref(db,"typing"),snap=>{
-if(!snap.exists())return typing.innerText="";
-const users=
-Object.keys(snap.val()).filter(u=>u!==username);
-
-typing.innerText=
-users.length?users.join(", ")+" typing...":"";
-});
-
-/* ===== IMAGE SEND ===== */
-
+/* IMAGE */
 imgBtn.onclick=()=>imgInput.click();
-
 imgInput.onchange=e=>{
 const file=e.target.files[0];
 if(!file)return;
-
 const reader=new FileReader();
 reader.onload=()=>{
 push(ref(db,"messages"),{
+type:"image",
 image:reader.result,
 user:username,
+displayName:userProfile.displayName||username,
+photo:userProfile.photo||"",
 time:Date.now(),
-reply:null,
 reactions:{},
 seen:false
 });
@@ -408,31 +346,74 @@ seen:false
 reader.readAsDataURL(file);
 };
 
-/* ===== REPLY UI ===== */
+/* VOICE */
+let mediaRecorder;
+let audioChunks=[];
+let recordTimeout;
 
-function showReply(text){
-removeReplyPreview();
+voiceBtn.onmousedown=async()=>{
+const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+mediaRecorder=new MediaRecorder(stream);
+mediaRecorder.start();
+audioChunks=[];
 
-const bar=document.createElement("div");
-bar.id="replyBar";
-bar.className="reply-preview";
-bar.innerHTML=`Replying: ${text} ❌`;
-
-bar.onclick=()=>{
-replyTo=null;
-bar.remove();
+mediaRecorder.ondataavailable=e=>{
+audioChunks.push(e.data);
 };
 
-document.querySelector(".input-area").prepend(bar);
+recordTimeout=setTimeout(()=>{
+mediaRecorder.stop();
+},6000);
+};
+
+voiceBtn.onmouseup=()=>{
+clearTimeout(recordTimeout);
+if(mediaRecorder && mediaRecorder.state!=="inactive"){
+mediaRecorder.stop();
+}
+};
+
+voiceBtn.addEventListener("mouseleave",()=>{
+if(mediaRecorder && mediaRecorder.state==="recording"){
+mediaRecorder.stop();
+}
+});
+
+if(window.MediaRecorder){
+voiceBtn.onclick=null;
 }
 
-function removeReplyPreview(){
-const old=document.getElementById("replyBar");
-if(old)old.remove();
+document.addEventListener("mouseup",()=>{
+if(mediaRecorder && mediaRecorder.state==="recording"){
+mediaRecorder.stop();
+}
+});
+
+function handleVoiceStop(){
+const blob=new Blob(audioChunks,{type:"audio/webm"});
+const reader=new FileReader();
+reader.onload=()=>{
+push(ref(db,"messages"),{
+type:"voice",
+voice:reader.result,
+user:username,
+displayName:userProfile.displayName||username,
+photo:userProfile.photo||"",
+time:Date.now(),
+reactions:{},
+seen:false
+});
+};
+reader.readAsDataURL(blob);
 }
 
-/* ===== LOAD MESSAGES ===== */
+document.addEventListener("DOMContentLoaded",()=>{
+if(mediaRecorder){
+mediaRecorder.onstop=handleVoiceStop;
+}
+});
 
+/* LOAD MESSAGES */
 onChildAdded(ref(db,"messages"),snap=>{
 
 const m=snap.val();
@@ -441,59 +422,38 @@ const key=snap.key;
 const div=document.createElement("div");
 div.className="msg "+(m.user===username?"sent":"received");
 
-/* username small text top */
-if(lastSender!==m.user){
 const label=document.createElement("div");
 label.className="user-label";
-label.textContent=m.user;
+label.innerHTML=`
+<img src="${m.photo||'https://i.imgur.com/6VBx3io.png'}">
+${m.displayName||m.user}
+`;
 div.appendChild(label);
-lastSender=m.user;
-}
 
 const bubble=document.createElement("div");
 bubble.className="bubble";
 
 bubble.innerHTML=`
-${m.reply?`<div class="reply-preview">${m.reply}</div>`:""}
-${m.text||""}
-${m.image?'<img src="'+m.image+'" style="width:100%;border-radius:10px;margin-top:6px">':""}
+
+${m.type==="text"?m.text:""}
+
+${m.type==="image"?
+'<img src="'+m.image+'" style="width:100%;border-radius:10px;margin-top:6px">':""}
+
+${m.type==="voice"?
+'<audio controls style="width:100%;margin-top:6px"><source src="'+m.voice+'"></audio>':""}
+
 <div class="react">${m.reactions?Object.values(m.reactions).join(" "):""}</div>
+
 <div class="time">
 ${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
 ${m.user===username?'<span class="ticks">'+(m.seen?'✓✓':'✓')+'</span>':""}
 </div>
 `;
 
-/* CLICK REPLY */
-bubble.onclick=()=>{
-replyTo=m.text||"Image";
-showReply(replyTo);
-};
-
-/* DOUBLE CLICK REACT ❤️ */
-bubble.ondblclick=()=>{
-update(ref(db,"messages/"+key+"/reactions/"+username),"❤️");
-};
-
-/* RIGHT CLICK MENU (FIXED) */
 bubble.oncontextmenu=e=>{
 e.preventDefault();
-
-const action=prompt("1.React  2.Edit  3.Delete");
-
-if(action==="1"){
-const emoji=prompt("Emoji 👍🔥😂❤️");
-if(emoji)
-update(ref(db,"messages/"+key+"/reactions/"+username),emoji);
-}
-
-if(action==="2" && m.user===username){
-const edit=prompt("Edit message",m.text);
-if(edit!==null)
-update(ref(db,"messages/"+key),{text:edit});
-}
-
-if(action==="3" && m.user===username){
+if(confirm("Delete message?") && m.user===username){
 remove(ref(db,"messages/"+key));
 div.remove();
 }
@@ -501,57 +461,15 @@ div.remove();
 
 div.appendChild(bubble);
 box.appendChild(div);
-
-requestAnimationFrame(()=>{
 box.scrollTop=box.scrollHeight;
-});
-
-if(m.user!==username){
-update(ref(db,"messages/"+key),{seen:true});
-}
-
-});
-
-/* ===== SEARCH ===== */
-
-search.oninput=()=>{
-const val=search.value.toLowerCase();
-
-document.querySelectorAll(".msg").forEach(m=>{
-m.style.display=
-m.innerText.toLowerCase().includes(val)
-?"flex":"none";
-});
-};
-
-});
-/* ================= AUTO HIDE TOP MENU ================= */
-
-window.addEventListener("DOMContentLoaded",()=>{
-
-const topMenu=document.querySelector(".top-menu");
-const messages=document.getElementById("messages");
-
-if(!topMenu || !messages) return;
-
-let lastScroll=0;
-
-messages.addEventListener("scroll",()=>{
-
-const currentScroll=messages.scrollTop;
-
-if(currentScroll>lastScroll && currentScroll>40){
-topMenu.classList.add("hide");
-}else{
-topMenu.classList.remove("hide");
-}
-
-lastScroll=currentScroll;
 
 });
 
 });
+
 </script>
-  <script type="module" src="analytics.js"></script>
+
+<script type="module" src="analytics.js"></script>
+
 </body>
-                         </html>
+  </html>
