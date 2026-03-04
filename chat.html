@@ -228,6 +228,8 @@ Online Users: <span id="onlineCount">0</span>
 </div>
 
 <script type="module">
+<!-- ONLY SCRIPT SECTION CHANGED — UI & CSS UNTOUCHED -->
+<script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
@@ -248,6 +250,8 @@ const db=getDatabase(app);
 const storage=getStorage(app);
 
 let username="";
+let mediaRecorder=null;
+let audioChunks=[];
 
 onAuthStateChanged(auth,user=>{
 if(!user) location.href="login.html";
@@ -262,7 +266,7 @@ onValue(ref(db,"online"),snap=>{
 onlineCount.textContent=snap.exists()?Object.keys(snap.val()).length:0;
 });
 
-/* TEXT */
+/* TEXT MESSAGE */
 sendBtn.onclick=()=>{
 const text=messageInput.value.trim();
 if(!text)return;
@@ -272,16 +276,15 @@ type:"text",
 text,
 user:username,
 time:Date.now(),
-seen:false,
-reactions:{}
+seen:false
 });
 
 messageInput.value="";
 };
 
-/* 🔥 IMAGE COMPRESSION FUNCTION */
+/* 🔥 IMAGE COMPRESSION */
 async function compressImage(file){
-return new Promise((resolve)=>{
+return new Promise(resolve=>{
 const img=new Image();
 const reader=new FileReader();
 
@@ -290,6 +293,7 @@ reader.onload=e=>img.src=e.target.result;
 img.onload=()=>{
 const canvas=document.createElement("canvas");
 const maxWidth=1280;
+
 let width=img.width;
 let height=img.height;
 
@@ -306,23 +310,23 @@ ctx.drawImage(img,0,0,width,height);
 
 canvas.toBlob(blob=>{
 resolve(blob);
-},"image/jpeg",0.7); // 70% quality
+},"image/jpeg",0.7);
 };
 
 reader.readAsDataURL(file);
 });
 }
 
-/* IMAGE → COMPRESS → STORAGE */
+/* IMAGE UPLOAD */
 imgBtn.onclick=()=>imgInput.click();
 imgInput.onchange=async e=>{
 const file=e.target.files[0];
 if(!file)return;
 
-const compressedBlob=await compressImage(file);
+const compressed=await compressImage(file);
 
 const fileRef=sRef(storage,`chatMedia/images/${Date.now()}.jpg`);
-await uploadBytes(fileRef,compressedBlob);
+await uploadBytes(fileRef,compressed);
 const url=await getDownloadURL(fileRef);
 
 push(ref(db,"messages"),{
@@ -333,18 +337,83 @@ time:Date.now()
 });
 };
 
-/* LOAD */
+/* VIDEO UPLOAD */
+videoBtn.onclick=()=>videoInput.click();
+videoInput.onchange=async e=>{
+const file=e.target.files[0];
+if(!file)return;
+
+const fileRef=sRef(storage,`chatMedia/videos/${Date.now()}_${file.name}`);
+await uploadBytes(fileRef,file);
+const url=await getDownloadURL(fileRef);
+
+push(ref(db,"messages"),{
+type:"video",
+url,
+user:username,
+time:Date.now()
+});
+};
+
+/* VOICE RECORD */
+voiceBtn.onmousedown=async()=>{
+const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+mediaRecorder=new MediaRecorder(stream);
+audioChunks=[];
+mediaRecorder.start();
+
+mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+};
+
+document.onmouseup=stopVoice;
+voiceBtn.ondblclick=stopVoice;
+
+async function stopVoice(){
+if(mediaRecorder && mediaRecorder.state==="recording"){
+mediaRecorder.stop();
+mediaRecorder.onstop=async()=>{
+const blob=new Blob(audioChunks,{type:"audio/webm"});
+const fileRef=sRef(storage,`chatMedia/voice/${Date.now()}.webm`);
+await uploadBytes(fileRef,blob);
+const url=await getDownloadURL(fileRef);
+
+push(ref(db,"messages"),{
+type:"voice",
+url,
+user:username,
+time:Date.now()
+});
+};
+}
+}
+
+/* LOAD MESSAGES */
 onChildAdded(ref(db,"messages"),snap=>{
 const m=snap.val();
 const div=document.createElement("div");
 div.className="msg "+(m.user===username?"sent":"received");
 
 let content="";
+
 if(m.type==="text") content=m.text;
-if(m.type==="image")
+
+if(m.type==="image"){
 content=`<img src="${m.url}">
 <button class="download-btn" onclick="window.open('${m.url}')">
 <i class="fa fa-download"></i></button>`;
+}
+
+if(m.type==="video"){
+content=`<video controls src="${m.url}"></video>
+<button class="download-btn" onclick="window.open('${m.url}')">
+<i class="fa fa-download"></i></button>`;
+}
+
+if(m.type==="voice"){
+content=`<div class="voice-bubble">
+<audio controls src="${m.url}"></audio>
+</div>`;
+}
 
 div.innerHTML=`<div class="bubble">
 ${content}
@@ -358,9 +427,8 @@ messages.scrollTop=messages.scrollHeight;
 });
 
 });
-
 </script>
-
+  
 <script type="module" src="analytics.js"></script>
 
 </body>
