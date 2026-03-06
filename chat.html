@@ -21,6 +21,8 @@ overflow:hidden;
 padding-bottom:120px;
 }
 
+/* HEADER */
+
 header{
 padding:14px;
 text-align:center;
@@ -29,21 +31,38 @@ backdrop-filter:blur(18px);
 border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-.top-menu{
-display:flex;
-justify-content:center;
-gap:10px;
-margin-top:8px;
+.online{
+font-size:11px;
+color:#00f5ff;
 }
 
-.top-menu button{
+/* TOP CHAT SWITCH BAR */
+
+.chat-switch{
+display:flex;
+gap:8px;
+padding:10px;
+justify-content:center;
+background:#0c0d15;
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.chat-switch button{
+background:rgba(255,255,255,.05);
 border:none;
-padding:6px 14px;
-border-radius:20px;
-background:#111;
 color:#fff;
+padding:8px 14px;
+border-radius:18px;
+font-size:12px;
 cursor:pointer;
 }
+
+.chat-switch button.active{
+background:linear-gradient(135deg,#00f5ff,#a855f7);
+color:#000;
+}
+
+/* MESSAGE AREA */
 
 #messages{
 flex:1;
@@ -54,20 +73,33 @@ flex-direction:column;
 gap:10px;
 }
 
+/* MESSAGE */
+
 .msg{
 max-width:85%;
 display:flex;
-flex-direction:column;
+gap:8px;
 }
 
-.sent{align-self:flex-end;}
-.received{align-self:flex-start;}
+.sent{
+align-self:flex-end;
+flex-direction:row-reverse;
+}
+
+.msg img.avatar{
+width:32px;
+height:32px;
+border-radius:50%;
+object-fit:cover;
+border:1px solid #00f5ff;
+}
 
 .bubble{
 padding:10px 14px;
-border-radius:18px;
-font-size:14px;
+border-radius:16px;
 background:rgba(255,255,255,.05);
+font-size:14px;
+position:relative;
 }
 
 .sent .bubble{
@@ -75,24 +107,25 @@ background:linear-gradient(135deg,#00f5ff,#a855f7);
 color:#000;
 }
 
-.time{
-font-size:10px;
-opacity:.6;
-text-align:right;
-margin-top:4px;
-}
-
 .username{
 font-size:11px;
-opacity:.8;
-margin-bottom:2px;
+color:#00f5ff;
+margin-bottom:3px;
 }
 
-img,video{
-width:100%;
-border-radius:10px;
-margin-top:6px;
+.time{
+font-size:9px;
+opacity:.7;
+text-align:right;
 }
+
+.ticks{
+margin-left:5px;
+color:#00f5ff;
+font-size:10px;
+}
+
+/* INPUT */
 
 .input-area{
 position:fixed;
@@ -111,6 +144,7 @@ border:none;
 border-radius:25px;
 background:rgba(255,255,255,.05);
 color:#fff;
+outline:none;
 }
 
 .btn{
@@ -120,8 +154,9 @@ border:none;
 border-radius:50%;
 background:linear-gradient(135deg,#00f5ff,#a855f7);
 color:#000;
-cursor:pointer;
 }
+
+/* MENU BAR */
 
 .menu-bar{
 position:fixed;
@@ -136,12 +171,20 @@ border-radius:35px;
 display:flex;
 justify-content:space-around;
 padding:14px 5px;
+box-shadow:0 0 20px rgba(0,245,255,.3)
 }
 
 .menu-bar a{
 color:#888;
 font-size:22px;
-text-decoration:none;
+flex:1;
+text-align:center;
+text-decoration:none
+}
+
+.menu-bar a.active{
+color:#00f5ff;
+transform:translateY(-6px)
 }
 
 </style>
@@ -150,73 +193,49 @@ text-decoration:none;
 <body>
 
 <header>
-
 CHAT LEVEL MAX
+<div class="online">
+Online Users: <span id="onlineCount">0</span>
+</div>
+</header>
 
-<div class="top-menu">
-<button id="globalBtn">Group Chat</button>
+<div class="chat-switch">
+<button id="globalBtn" class="active">Group Chat</button>
 <button id="privateBtn">Private Chat</button>
 <button id="campaignBtn">Campaign</button>
 </div>
 
-</header>
-
 <div id="messages"></div>
 
 <div class="input-area">
+
 <input type="file" id="imgInput" hidden accept="image/*">
 <input type="file" id="videoInput" hidden accept="video/*">
 
-<button class="btn" id="imgBtn">
-<i class="fa fa-image"></i>
-</button>
-
-<button class="btn" id="videoBtn">
-<i class="fa fa-video"></i>
-</button>
-
-<button class="btn" id="sendBtn">
-<i class="fa fa-paper-plane"></i>
-</button>
+<button class="btn" id="imgBtn"><i class="fa fa-image"></i></button>
+<button class="btn" id="videoBtn"><i class="fa fa-video"></i></button>
+<button class="btn" id="sendBtn"><i class="fa fa-paper-plane"></i></button>
 
 <input id="messageInput" placeholder="Type message...">
+
 </div>
 
 <div class="menu-bar">
 <a href="home.html"><i class="fa-solid fa-house"></i></a>
 <a href="stream.html"><i class="fa-solid fa-video"></i></a>
 <a href="data.html"><i class="fa-solid fa-sim-card"></i></a>
-<a href="chat.html"><i class="fa-solid fa-comments"></i></a>
+<a href="chat.html" class="active"><i class="fa-solid fa-comments"></i></a>
 <a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+import { getDatabase, ref, push, onChildAdded, set, get, update, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
 
-import {
-getAuth,
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-import {
-getDatabase,
-ref,
-push,
-onChildAdded
-}
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-
-import {
-getStorage,
-ref as sRef,
-uploadBytes,
-getDownloadURL
-}
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
-
+/* FIREBASE */
 
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
@@ -231,51 +250,116 @@ const auth=getAuth(app);
 const db=getDatabase(app);
 const storage=getStorage(app);
 
+/* VARIABLES */
+
 let username="";
 let chatMode="global";
+let replyMessage=null;
 
-onAuthStateChanged(auth,user=>{
+/* AUTH */
+
+onAuthStateChanged(auth,async user=>{
+
 if(!user) location.href="login.html";
 
 username=user.email.split("@")[0];
+
+/* ONLINE USERS */
+
+const onlineRef=ref(db,"online/"+username);
+
+set(onlineRef,true);
+onDisconnect(onlineRef).remove();
+
+onValue(ref(db,"online"),snap=>{
+onlineCount.textContent=snap.exists()?Object.keys(snap.val()).length:0;
+});
+
+/* LOAD MESSAGES */
 
 loadMessages();
 
 });
 
+/* SEND MESSAGE */
+
+sendBtn.onclick=()=>{
+
+const text=messageInput.value.trim();
+if(!text)return;
+
+push(ref(db,"messages/"+chatMode),{
+
+text,
+user:username,
+time:Date.now(),
+seen:false,
+reply:replyMessage
+
+});
+
+replyMessage=null;
+messageInput.value="";
+
+};
+
+/* LOAD MESSAGES */
 
 function loadMessages(){
 
 messages.innerHTML="";
 
-onChildAdded(
-ref(db,"messages/"+chatMode),
-snap=>{
+onChildAdded(ref(db,"messages/"+chatMode),async snap=>{
 
 const m=snap.val();
+const id=snap.key;
+
+let photo="https://i.imgur.com/2DhmtJ4.png";
+let name=m.user;
+
+const userSnap=await get(ref(db,"users/"+m.user));
+
+if(userSnap.exists()){
+const u=userSnap.val();
+photo=u.photo || photo;
+name=u.username || name;
+}
 
 const div=document.createElement("div");
-
-div.className="msg "+(m.user===username?"sent":"received");
+div.className="msg "+(m.user===username?"sent":"");
 
 div.innerHTML=`
 
-<div class="username">${m.user}</div>
+<img class="avatar" src="${photo}">
+
+<div>
+
+<div class="username">${name}</div>
 
 <div class="bubble">
 
-${m.type==="image" ? `<img src="${m.url}">` : ""}
+${m.reply?`<div style="font-size:11px;color:#aaa">↪ ${m.reply}</div>`:""}
 
-${m.type==="video" ? `<video controls src="${m.url}"></video>` : ""}
-
-${m.text ? m.text : ""}
+${m.text}
 
 <div class="time">
 
-${new Date(m.time).toLocaleTimeString([],{
-hour:"2-digit",
-minute:"2-digit"
-})}
+${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
+
+${m.user===username?`<span class="ticks">${m.seen?"✓✓":"✓"}</span>`:""}
+
+</div>
+
+</div>
+
+<div style="font-size:11px;margin-top:4px">
+
+<span onclick="reply('${m.text}')">Reply</span>
+
+${m.user===username?`
+ | <span onclick="editMsg('${id}','${m.text}')">Edit</span>
+ | <span onclick="deleteMsg('${id}')">Delete</span>
+`:""}
 
 </div>
 
@@ -283,45 +367,69 @@ minute:"2-digit"
 `;
 
 messages.appendChild(div);
-
 messages.scrollTop=messages.scrollHeight;
 
+/* SEEN */
+
+if(m.user!==username && !m.seen){
+
+update(ref(db,"messages/"+chatMode+"/"+id),{
+seen:true
 });
+
 }
 
-
-
-sendBtn.onclick=()=>{
-
-const text=messageInput.value.trim();
-
-if(!text) return;
-
-push(ref(db,"messages/"+chatMode),{
-
-type:"text",
-text,
-user:username,
-time:Date.now()
-
 });
 
-messageInput.value="";
+}
 
-};
+/* REPLY */
 
+window.reply=(text)=>{
 
+replyMessage=text;
+messageInput.placeholder="Replying: "+text;
+
+}
+
+/* EDIT */
+
+window.editMsg=(id,text)=>{
+
+const newText=prompt("Edit message:",text);
+
+if(newText){
+
+update(ref(db,"messages/"+chatMode+"/"+id),{
+text:newText
+});
+
+}
+
+}
+
+/* DELETE */
+
+window.deleteMsg=(id)=>{
+
+if(confirm("Delete message?")){
+
+remove(ref(db,"messages/"+chatMode+"/"+id));
+
+}
+
+}
+
+/* MEDIA */
 
 imgBtn.onclick=()=>imgInput.click();
 
 imgInput.onchange=async e=>{
 
 const file=e.target.files[0];
+if(!file)return;
 
-const fileRef=sRef(
-storage,
-"chatMedia/images/"+Date.now()+".jpg"
-);
+const fileRef=sRef(storage,"chatImages/"+Date.now());
 
 await uploadBytes(fileRef,file);
 
@@ -338,18 +446,14 @@ time:Date.now()
 
 };
 
-
-
 videoBtn.onclick=()=>videoInput.click();
 
 videoInput.onchange=async e=>{
 
 const file=e.target.files[0];
+if(!file)return;
 
-const fileRef=sRef(
-storage,
-"chatMedia/videos/"+Date.now()+".mp4"
-);
+const fileRef=sRef(storage,"chatVideos/"+Date.now());
 
 await uploadBytes(fileRef,file);
 
@@ -365,23 +469,6 @@ time:Date.now()
 });
 
 };
-
-
-
-globalBtn.onclick=()=>{
-chatMode="global";
-loadMessages();
-}
-
-privateBtn.onclick=()=>{
-chatMode="private";
-loadMessages();
-}
-
-campaignBtn.onclick=()=>{
-chatMode="campaign";
-loadMessages();
-}
 
 </script>
 
