@@ -18,6 +18,7 @@ padding-bottom:120px;
 }
 
 /* HEADER */
+
 header{
 text-align:center;
 padding:14px;
@@ -26,7 +27,44 @@ backdrop-filter:blur(15px);
 border-bottom:1px solid rgba(255,255,255,.06);
 }
 
+/* PROFILE HEADER */
+
+.profile-top{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+padding:20px;
+}
+
+.avatar{
+width:90px;
+height:90px;
+border-radius:50%;
+object-fit:cover;
+border:3px solid #00f5ff;
+box-shadow:0 0 15px rgba(0,245,255,.5);
+}
+
+.bio{
+font-size:13px;
+opacity:.8;
+text-align:center;
+max-width:250px;
+}
+
+.edit-btn{
+background:linear-gradient(135deg,#00f5ff,#a855f7);
+border:none;
+padding:6px 12px;
+border-radius:12px;
+cursor:pointer;
+color:#000;
+font-size:12px;
+}
+
 /* CONTENT */
+
 .container{
 padding:15px;
 display:flex;
@@ -51,6 +89,22 @@ margin-bottom:5px;
 .value{
 font-size:15px;
 word-break:break-all;
+}
+
+.stats{
+display:flex;
+justify-content:space-between;
+text-align:center;
+}
+
+.stat-number{
+font-size:18px;
+font-weight:600;
+}
+
+.stat-label{
+font-size:11px;
+opacity:.6;
 }
 
 button{
@@ -80,7 +134,8 @@ color:#fff;
 
 .hidden{display:none;}
 
-/* FLOATING MENU BAR (HOME STYLE) */
+/* MENU BAR */
+
 .menu-bar{
 position:fixed;
 bottom:20px;
@@ -103,7 +158,6 @@ font-size:22px;
 flex:1;
 text-align:center;
 text-decoration:none;
-transition:.3s;
 }
 
 .menu-bar a.active{
@@ -120,7 +174,49 @@ transform:translateY(-6px);
 <h3>My Profile</h3>
 </header>
 
+<!-- PROFILE TOP -->
+<div class="profile-top">
+
+<img id="profilePhoto"
+class="avatar"
+src="https://i.imgur.com/2DhmtJ4.png">
+
+<input type="file" id="photoInput" hidden>
+
+<h3 id="username"></h3>
+
+<div class="bio" id="bioText">
+No bio yet
+</div>
+
+<button class="edit-btn" id="editProfile">
+Edit Profile
+</button>
+
+</div>
+
 <div class="container">
+
+<div class="card">
+<div class="stats">
+
+<div>
+<div class="stat-number" id="balance">0</div>
+<div class="stat-label">Balance</div>
+</div>
+
+<div>
+<div class="stat-number" id="totalBuys">0</div>
+<div class="stat-label">Purchases</div>
+</div>
+
+<div>
+<div class="stat-number" id="userID"></div>
+<div class="stat-label">User ID</div>
+</div>
+
+</div>
+</div>
 
 <div class="card">
 <div class="title">Email</div>
@@ -128,21 +224,7 @@ transform:translateY(-6px);
 </div>
 
 <div class="card">
-<div class="title">Username</div>
-<div class="value" id="username"></div>
-</div>
 
-<div class="card">
-<div class="title">Balance</div>
-<div class="value">₵ <span id="balance">0.00</span></div>
-</div>
-
-<div class="card">
-<div class="title">Total Purchases</div>
-<div class="value" id="totalBuys">0</div>
-</div>
-
-<div class="card">
 <button id="adminBtn" class="admin hidden">
 Open Admin Dashboard
 </button>
@@ -150,11 +232,11 @@ Open Admin Dashboard
 <button id="logoutBtn" class="logout">
 Logout
 </button>
-</div>
 
 </div>
 
-<!-- SAME MENU BAR AS HOME -->
+</div>
+
 <div class="menu-bar">
 <a href="home.html"><i class="fa-solid fa-house"></i></a>
 <a href="stream.html"><i class="fa-solid fa-video"></i></a>
@@ -162,8 +244,9 @@ Logout
 <a href="chat.html"><i class="fa-solid fa-comments"></i></a>
 <a href="profile.html" class="active"><i class="fa-solid fa-user"></i></a>
 </div>
-  <a href="privacy.html">Privacy and Policy</a>
-  <a href="terms.html">Terms and Conditions</a>
+
+<a href="privacy.html">Privacy and Policy</a>
+<a href="terms.html">Terms and Conditions</a>
 
 <script type="module">
 
@@ -180,12 +263,17 @@ getDatabase,ref,onValue,set,update,onDisconnect
 }
 from"https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-/* FIREBASE */
+import{
+getStorage,ref as sRef,uploadBytes,getDownloadURL
+}
+from"https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
+
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
 databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
-projectId:"qwen-911"
+projectId:"qwen-911",
+storageBucket:"qwen-911.appspot.com"
 };
 
 const ADMIN_EMAIL="kwamemarfo916@gmail.com";
@@ -193,8 +281,7 @@ const ADMIN_EMAIL="kwamemarfo916@gmail.com";
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
-
-/* ================= AUTH ================= */
+const storage=getStorage(app);
 
 onAuthStateChanged(auth,user=>{
 
@@ -203,88 +290,107 @@ location.href="index.html";
 return;
 }
 
-/* USER INFO */
 userEmail.textContent=user.email;
 username.textContent=user.email.split("@")[0];
+userID.textContent=user.uid.slice(0,6);
 
-const userPath="users/"+user.uid;
-const userRef=ref(db,userPath);
+const userRef=ref(db,"users/"+user.uid);
 
-/* ===== AUTO CREATE USER RECORD ===== */
-set(ref(db,userPath+"/meta"),{
-lastLogin:Date.now()
-});
-
-/* ===== ONLINE STATUS ===== */
-const onlineRef=ref(db,"online/"+user.uid);
-set(onlineRef,{
-email:user.email,
-time:Date.now()
-});
-
-onDisconnect(onlineRef).remove();
-
-/* ===== REALTIME USER DATA ===== */
 onValue(userRef,snap=>{
 
 if(!snap.exists()){
-/* create default user */
+
 set(userRef,{
 balance:0,
 totalBuys:0,
+bio:"",
+photo:"",
 createdAt:Date.now()
 });
+
 return;
 }
 
 const d=snap.val();
 
-balance.textContent=
-Number(d.balance||0).toFixed(2);
+balance.textContent=Number(d.balance||0).toFixed(2);
+totalBuys.textContent=d.totalBuys||0;
 
-totalBuys.textContent=
-d.totalBuys||0;
+if(d.bio) bioText.textContent=d.bio;
+if(d.photo) profilePhoto.src=d.photo;
 
 });
 
-/* ===== ADMIN ACCESS ===== */
 if(user.email===ADMIN_EMAIL){
 adminBtn.classList.remove("hidden");
 }
 
-/* ===== ANALYTICS TRACK ===== */
-if(window.trackEvent){
-trackEvent("profile_open",{
-email:user.email
 });
+
+/* EDIT PROFILE */
+
+editProfile.onclick=()=>{
+
+const newName=prompt("New username",username.textContent);
+const newBio=prompt("New bio",bioText.textContent);
+
+if(newName){
+username.textContent=newName;
 }
 
+if(newBio){
+bioText.textContent=newBio;
+}
+
+const user=auth.currentUser;
+
+update(ref(db,"users/"+user.uid),{
+username:newName,
+bio:newBio
 });
 
-/* ================= BUTTONS ================= */
+photoInput.click();
+
+};
+
+/* PHOTO UPLOAD */
+
+photoInput.onchange=async e=>{
+
+const file=e.target.files[0];
+if(!file)return;
+
+const user=auth.currentUser;
+
+const fileRef=sRef(storage,"profilePhotos/"+user.uid);
+
+await uploadBytes(fileRef,file);
+
+const url=await getDownloadURL(fileRef);
+
+profilePhoto.src=url;
+
+update(ref(db,"users/"+user.uid),{
+photo:url
+});
+
+};
+
+/* BUTTONS */
 
 adminBtn.onclick=()=>{
-if(window.trackEvent){
-trackEvent("admin_open_click");
-}
 location.href="admin.html";
 };
 
 logoutBtn.onclick=()=>{
-
-if(auth.currentUser && window.trackEvent){
-trackEvent("logout",{
-email:auth.currentUser.email
-});
-}
-
 signOut(auth).then(()=>{
 location.href="index.html";
 });
 };
 
-                                                      </script>
+</script>
 
-  <script type="module" src="analytics.js"></script>
+<script type="module" src="analytics.js"></script>
+
 </body>
   </html>
