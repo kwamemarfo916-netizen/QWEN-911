@@ -17,33 +17,26 @@ color:#fff;
 padding-bottom:120px;
 }
 
-/* HEADER */
-
 header{
 text-align:center;
-padding:16px;
+padding:14px;
 background:rgba(20,20,30,.9);
 backdrop-filter:blur(15px);
 border-bottom:1px solid rgba(255,255,255,.06);
 }
 
-/* CONTAINER */
-
 .container{
-padding:16px;
+padding:15px;
 display:flex;
 flex-direction:column;
 gap:14px;
 }
-
-/* CARD */
 
 .card{
 background:rgba(255,255,255,.05);
 border-radius:16px;
 padding:14px;
 border:1px solid rgba(255,255,255,.08);
-box-shadow:0 0 12px rgba(0,245,255,.1);
 }
 
 .stat{
@@ -52,24 +45,16 @@ color:#00f5ff;
 margin-top:6px;
 }
 
-/* GRID */
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-}
-
 /* LIVE FEED */
-
 .feed{
 margin-top:10px;
 display:flex;
 flex-direction:column;
 gap:8px;
-max-height:260px;
+max-height:320px;
 overflow:auto;
 font-size:13px;
+color:#ccc;
 }
 
 .feed-item{
@@ -79,30 +64,14 @@ background:rgba(255,255,255,.04);
 border:1px solid rgba(255,255,255,.06);
 }
 
-/* ONLINE USERS */
-
+/* LIVE USERS */
 .user{
 padding:6px;
 border-bottom:1px solid rgba(255,255,255,.06);
 font-size:13px;
 }
 
-/* ADMIN BUTTONS */
-
-button{
-width:100%;
-padding:10px;
-margin-top:8px;
-border:none;
-border-radius:12px;
-background:linear-gradient(135deg,#00f5ff,#a855f7);
-color:#000;
-font-weight:600;
-cursor:pointer;
-}
-
-/* MENU */
-
+/* menu bar */
 .menu-bar{
 position:fixed;
 bottom:20px;
@@ -133,39 +102,32 @@ text-decoration:none;
 <body>
 
 <header>
-<h3>Admin Control Center</h3>
+<h3>Admin Dashboard</h3>
 </header>
 
 <div class="container">
 
-<div class="grid">
+<!-- APP STATS -->
 
 <div class="card">
-<div>App Opens</div>
+<div>Total App Opens</div>
 <div id="opens" class="stat">0</div>
 </div>
 
 <div class="card">
-<div>Messages Sent</div>
+<div>Total Messages Sent</div>
 <div id="messages" class="stat">0</div>
 </div>
 
 <div class="card">
-<div>Page Views</div>
+<div>Total Page Views</div>
 <div id="views" class="stat">0</div>
 </div>
 
-<div class="card">
-<div>Profile Views</div>
-<div id="profiles" class="stat">0</div>
-</div>
-
-</div>
-
-<!-- ONLINE USERS -->
+<!-- LIVE USERS -->
 
 <div class="card">
-<div>Online Users</div>
+<div>Live Online Users</div>
 <div id="onlineUsers"></div>
 </div>
 
@@ -174,17 +136,6 @@ text-decoration:none;
 <div class="card">
 <div>Live Activity</div>
 <div id="liveFeed" class="feed"></div>
-</div>
-
-<!-- MODERATION -->
-
-<div class="card">
-
-<div>Admin Tools</div>
-
-<button onclick="broadcast()">Broadcast Message</button>
-<button onclick="clearChat()">Clear Chat</button>
-
 </div>
 
 </div>
@@ -202,18 +153,21 @@ text-decoration:none;
 import { createClient }
 from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+/* SUPABASE */
+
 const supabase = createClient(
 "https://qagawtgfpfupobwuotvw.supabase.co",
-"YOUR_PUBLIC_KEY"
+"YOUR_ANON_KEY"
 );
 
-/* STATS */
+/* =========================
+   STATS COUNTERS
+========================= */
 
 let stats={
 APP_OPEN:0,
 MESSAGE_SENT:0,
-PAGE_VIEW:0,
-PROFILE_VIEW:0
+PAGE_VIEW:0
 };
 
 function updateUI(){
@@ -221,11 +175,12 @@ function updateUI(){
 opens.textContent=stats.APP_OPEN;
 messages.textContent=stats.MESSAGE_SENT;
 views.textContent=stats.PAGE_VIEW;
-profiles.textContent=stats.PROFILE_VIEW;
 
 }
 
-/* LOAD STATS */
+/* =========================
+   LOAD STATS
+========================= */
 
 async function loadStats(){
 
@@ -234,7 +189,7 @@ const {data}=await supabase
 .select("event_type");
 
 data.forEach(e=>{
-if(stats[e.event_type]!=undefined){
+if(stats[e.event_type]!==undefined){
 stats[e.event_type]++;
 }
 });
@@ -245,7 +200,9 @@ updateUI();
 
 loadStats();
 
-/* LIVE FEED */
+/* =========================
+   LIVE FEED
+========================= */
 
 function addFeedItem(event){
 
@@ -254,11 +211,16 @@ const feed=document.getElementById("liveFeed");
 const row=document.createElement("div");
 row.className="feed-item";
 
+const time=new Date(event.created_at)
+.toLocaleTimeString();
+
 row.innerHTML=`
-<b style="color:#00f5ff">${event.username||"guest"}</b>
+<b style="color:#00f5ff">
+${event.username||"guest"}
+</b>
 → ${event.event_type}
 <div style="opacity:.6;font-size:11px">
-${new Date(event.created_at).toLocaleTimeString()}
+${time}
 </div>
 `;
 
@@ -268,7 +230,7 @@ if(feed.children.length>20){
 feed.removeChild(feed.lastChild);
 }
 
-if(stats[event.event_type]!=undefined){
+if(stats[event.event_type]!==undefined){
 stats[event.event_type]++;
 updateUI();
 }
@@ -277,7 +239,7 @@ updateUI();
 
 /* INITIAL FEED */
 
-async function loadFeed(){
+async function loadInitialFeed(){
 
 const {data}=await supabase
 .from("analytics_events")
@@ -289,9 +251,9 @@ data.reverse().forEach(addFeedItem);
 
 }
 
-loadFeed();
+loadInitialFeed();
 
-/* REALTIME */
+/* REALTIME FEED */
 
 supabase
 .channel("analytics-live")
@@ -305,60 +267,45 @@ addFeedItem(payload.new);
 })
 .subscribe();
 
-/* ONLINE USERS */
+/* =========================
+   LIVE USERS
+========================= */
 
-async function loadOnline(){
+async function loadOnlineUsers(){
 
 const {data}=await supabase
-.from("online_users")
+.from("live_users")
 .select("*");
+
+const box=document.getElementById("onlineUsers");
+box.innerHTML="";
 
 data.forEach(u=>{
 
 const div=document.createElement("div");
 div.className="user";
-div.textContent=u.username;
 
-onlineUsers.appendChild(div);
+div.innerHTML=
+`<b>${u.username}</b>
+<span style="opacity:.6">
+→ ${u.page}
+</span>`;
+
+box.appendChild(div);
 
 });
 
 }
 
-loadOnline();
+/* refresh every 5 seconds */
 
-/* ADMIN TOOLS */
+setInterval(loadOnlineUsers,5000);
 
-window.broadcast=()=>{
-
-const msg=prompt("Broadcast message");
-
-if(!msg)return;
-
-supabase
-.from("broadcasts")
-.insert({message:msg});
-
-alert("Broadcast sent");
-
-}
-
-window.clearChat=async()=>{
-
-if(confirm("Delete all messages?")){
-
-await supabase
-.from("messages")
-.delete()
-.neq("id",0);
-
-alert("Chat cleared");
-
-}
-
-}
+loadOnlineUsers();
 
 </script>
 
+<script type="module" src="analytics.js"></script>
+
 </body>
-                                                           </html>
+  </html>
