@@ -200,9 +200,9 @@ Online Users: <span id="onlineCount">0</span>
 </header>
 
 <div class="chat-switch">
-<button id="globalBtn" class="active">Group Chat</button>
-<button id="privateBtn">Private Chat</button>
-<button id="campaignBtn">Campaign</button>
+<a href="chat.html"><button id="globalBtn" class="active">Group Chat</button></a>
+<a href="privatechat.html"><button id="privateBtn">Private Chat</button></a>
+<a hrerf="campaign.html"><button id="campaignBtn">Campaign</button></a>
 </div>
 
 <div id="messages"></div>
@@ -235,8 +235,6 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { getDatabase, ref, push, onChildAdded, set, get, update, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
 
-/* FIREBASE */
-
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
@@ -250,21 +248,15 @@ const auth=getAuth(app);
 const db=getDatabase(app);
 const storage=getStorage(app);
 
-/* VARIABLES */
-
 let username="";
 let chatMode="global";
 let replyMessage=null;
-
-/* AUTH */
 
 onAuthStateChanged(auth,async user=>{
 
 if(!user) location.href="login.html";
 
 username=user.email.split("@")[0];
-
-/* ONLINE USERS */
 
 const onlineRef=ref(db,"online/"+username);
 
@@ -275,13 +267,9 @@ onValue(ref(db,"online"),snap=>{
 onlineCount.textContent=snap.exists()?Object.keys(snap.val()).length:0;
 });
 
-/* LOAD MESSAGES */
-
 loadMessages();
 
 });
-
-/* SEND MESSAGE */
 
 sendBtn.onclick=()=>{
 
@@ -289,21 +277,16 @@ const text=messageInput.value.trim();
 if(!text)return;
 
 push(ref(db,"messages/"+chatMode),{
-
 text,
 user:username,
 time:Date.now(),
 seen:false,
 reply:replyMessage
-
 });
 
 replyMessage=null;
 messageInput.value="";
-
 };
-
-/* LOAD MESSAGES */
 
 function loadMessages(){
 
@@ -340,7 +323,11 @@ div.innerHTML=`
 
 ${m.reply?`<div style="font-size:11px;color:#aaa">↪ ${m.reply}</div>`:""}
 
-${m.text}
+${m.type==="image" ? `<img src="${m.url}" style="max-width:220px;border-radius:10px">` : ""}
+
+${m.type==="video" ? `<video controls src="${m.url}" style="max-width:220px;border-radius:10px"></video>` : ""}
+
+${m.text ? m.text : ""}
 
 <div class="time">
 
@@ -369,105 +356,66 @@ ${m.user===username?`
 messages.appendChild(div);
 messages.scrollTop=messages.scrollHeight;
 
-/* SEEN */
-
 if(m.user!==username && !m.seen){
-
-update(ref(db,"messages/"+chatMode+"/"+id),{
-seen:true
-});
-
+update(ref(db,"messages/"+chatMode+"/"+id),{seen:true});
 }
 
 });
 
 }
-
-/* REPLY */
 
 window.reply=(text)=>{
-
 replyMessage=text;
 messageInput.placeholder="Replying: "+text;
-
 }
-
-/* EDIT */
 
 window.editMsg=(id,text)=>{
-
 const newText=prompt("Edit message:",text);
-
 if(newText){
-
-update(ref(db,"messages/"+chatMode+"/"+id),{
-text:newText
-});
-
+update(ref(db,"messages/"+chatMode+"/"+id),{text:newText});
 }
-
 }
-
-/* DELETE */
 
 window.deleteMsg=(id)=>{
-
 if(confirm("Delete message?")){
-
 remove(ref(db,"messages/"+chatMode+"/"+id));
-
 }
-
 }
-
-/* MEDIA */
 
 imgBtn.onclick=()=>imgInput.click();
 
 imgInput.onchange=async e=>{
-
 const file=e.target.files[0];
 if(!file)return;
 
 const fileRef=sRef(storage,"chatImages/"+Date.now());
-
 await uploadBytes(fileRef,file);
-
 const url=await getDownloadURL(fileRef);
 
 push(ref(db,"messages/"+chatMode),{
-
 type:"image",
 url,
 user:username,
 time:Date.now()
-
 });
-
 };
 
 videoBtn.onclick=()=>videoInput.click();
 
 videoInput.onchange=async e=>{
-
 const file=e.target.files[0];
 if(!file)return;
 
 const fileRef=sRef(storage,"chatVideos/"+Date.now());
-
 await uploadBytes(fileRef,file);
-
 const url=await getDownloadURL(fileRef);
 
 push(ref(db,"messages/"+chatMode),{
-
 type:"video",
 url,
 user:username,
 time:Date.now()
-
 });
-
 };
 
 </script>
