@@ -9,6 +9,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 <style>
 
+/* YOUR CSS UNCHANGED */
+
 body{
 margin:0;
 font-family:Inter,system-ui;
@@ -20,8 +22,6 @@ height:100vh;
 overflow:hidden;
 padding-bottom:120px;
 }
-
-/* HEADER */
 
 header{
 padding:14px;
@@ -35,8 +35,6 @@ border-bottom:1px solid rgba(255,255,255,.06);
 font-size:11px;
 color:#00f5ff;
 }
-
-/* TOP CHAT SWITCH BAR */
 
 .chat-switch{
 display:flex;
@@ -62,8 +60,6 @@ background:linear-gradient(135deg,#00f5ff,#a855f7);
 color:#000;
 }
 
-/* MESSAGE AREA */
-
 #messages{
 flex:1;
 overflow-y:auto;
@@ -72,8 +68,6 @@ display:flex;
 flex-direction:column;
 gap:10px;
 }
-
-/* MESSAGE */
 
 .msg{
 max-width:85%;
@@ -125,8 +119,6 @@ color:#00f5ff;
 font-size:10px;
 }
 
-/* INPUT */
-
 .input-area{
 position:fixed;
 bottom:90px;
@@ -155,8 +147,6 @@ border-radius:50%;
 background:linear-gradient(135deg,#00f5ff,#a855f7);
 color:#000;
 }
-
-/* MENU BAR */
 
 .menu-bar{
 position:fixed;
@@ -200,9 +190,9 @@ Online Users: <span id="onlineCount">0</span>
 </header>
 
 <div class="chat-switch">
-<a href="chat.html"><button id="globalBtn" class="active">Group Chat</button></a>
-<a href="privatechat.html"><button id="privateBtn">Private Chat</button></a>
-<a hrerf="campaign.html"><button id="campaignBtn">Campaign</button></a>
+<a href="chat.html"><button class="active">Group Chat</button></a>
+<a href="privatechat.html"><button>Private Chat</button></a>
+<a hrerf="campaign.html"><button>Campaign</button></a>
 </div>
 
 <div id="messages"></div>
@@ -233,20 +223,29 @@ Online Users: <span id="onlineCount">0</span>
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, set, get, update, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
-import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-storage.js";
+
+import { createClient } from
+"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+/* SUPABASE */
+
+const supabase = createClient(
+"https://qagawtgfpfupobwuotvw.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg3ODM3Nn0.-ocXPElc-S6aPlqpJBr0-Fvhv8rvaxEDnWKbw5C4dD4"
+);
+
+/* FIREBASE */
 
 const firebaseConfig={
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
 databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
-projectId:"qwen-911",
-storageBucket:"qwen-911.appspot.com"
+projectId:"qwen-911"
 };
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getDatabase(app);
-const storage=getStorage(app);
 
 let username="";
 let chatMode="global";
@@ -288,134 +287,70 @@ replyMessage=null;
 messageInput.value="";
 };
 
-function loadMessages(){
-
-messages.innerHTML="";
-
-onChildAdded(ref(db,"messages/"+chatMode),async snap=>{
-
-const m=snap.val();
-const id=snap.key;
-
-let photo="https://i.imgur.com/2DhmtJ4.png";
-let name=m.user;
-
-const userSnap=await get(ref(db,"users/"+m.user));
-
-if(userSnap.exists()){
-const u=userSnap.val();
-photo=u.photo || photo;
-name=u.username || name;
-}
-
-const div=document.createElement("div");
-div.className="msg "+(m.user===username?"sent":"");
-
-div.innerHTML=`
-
-<img class="avatar" src="${photo}">
-
-<div>
-
-<div class="username">${name}</div>
-
-<div class="bubble">
-
-${m.reply?`<div style="font-size:11px;color:#aaa">↪ ${m.reply}</div>`:""}
-
-${m.type==="image" ? `<img src="${m.url}" style="max-width:220px;border-radius:10px">` : ""}
-
-${m.type==="video" ? `<video controls src="${m.url}" style="max-width:220px;border-radius:10px"></video>` : ""}
-
-${m.text ? m.text : ""}
-
-<div class="time">
-
-${new Date(m.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}
-
-${m.user===username?`<span class="ticks">${m.seen?"✓✓":"✓"}</span>`:""}
-
-</div>
-
-</div>
-
-<div style="font-size:11px;margin-top:4px">
-
-<span onclick="reply('${m.text}')">Reply</span>
-
-${m.user===username?`
- | <span onclick="editMsg('${id}','${m.text}')">Edit</span>
- | <span onclick="deleteMsg('${id}')">Delete</span>
-`:""}
-
-</div>
-
-</div>
-`;
-
-messages.appendChild(div);
-messages.scrollTop=messages.scrollHeight;
-
-if(m.user!==username && !m.seen){
-update(ref(db,"messages/"+chatMode+"/"+id),{seen:true});
-}
-
-});
-
-}
-
-window.reply=(text)=>{
-replyMessage=text;
-messageInput.placeholder="Replying: "+text;
-}
-
-window.editMsg=(id,text)=>{
-const newText=prompt("Edit message:",text);
-if(newText){
-update(ref(db,"messages/"+chatMode+"/"+id),{text:newText});
-}
-}
-
-window.deleteMsg=(id)=>{
-if(confirm("Delete message?")){
-remove(ref(db,"messages/"+chatMode+"/"+id));
-}
-}
+/* IMAGE UPLOAD (SUPABASE) */
 
 imgBtn.onclick=()=>imgInput.click();
 
 imgInput.onchange=async e=>{
+
 const file=e.target.files[0];
 if(!file)return;
 
-const fileRef=sRef(storage,"chatImages/"+Date.now());
-await uploadBytes(fileRef,file);
-const url=await getDownloadURL(fileRef);
+const fileName="images/"+Date.now()+"_"+file.name;
+
+const { error } = await supabase.storage
+.from("QWEN-911")
+.upload(fileName,file);
+
+if(error){
+console.log(error);
+return;
+}
+
+const { data } = supabase.storage
+.from("QWEN-911")
+.getPublicUrl(fileName);
 
 push(ref(db,"messages/"+chatMode),{
 type:"image",
-url,
+url:data.publicUrl,
 user:username,
 time:Date.now()
 });
+
 };
+
+/* VIDEO UPLOAD (SUPABASE) */
 
 videoBtn.onclick=()=>videoInput.click();
 
 videoInput.onchange=async e=>{
+
 const file=e.target.files[0];
 if(!file)return;
 
-const fileRef=sRef(storage,"chatVideos/"+Date.now());
-await uploadBytes(fileRef,file);
-const url=await getDownloadURL(fileRef);
+const fileName="videos/"+Date.now()+"_"+file.name;
+
+const { error } = await supabase.storage
+.from("QWEN-911")
+.upload(fileName,file);
+
+if(error){
+console.log(error);
+return;
+}
+
+const { data } = supabase.storage
+.from("QWEN-911")
+.getPublicUrl(fileName);
 
 push(ref(db,"messages/"+chatMode),{
 type:"video",
-url,
+url:data.publicUrl,
 user:username,
 time:Date.now()
 });
+
 };
 
 </script>
