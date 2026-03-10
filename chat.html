@@ -228,39 +228,42 @@ Online Users: <span id="onlineCount">0</span>
 <a href="profile.html"><i class="fa-solid fa-user"></i></a>
 </div>
 
-<script type="module">
+  <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 import { getDatabase, ref, push, onChildAdded, set, onValue, onDisconnect, update, remove } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
 
-import { createClient } from
-"https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 /* SUPABASE */
 
-const supabase=createClient(
+const supabase = createClient(
 "https://qagawtgfpfupobwuotvw.supabase.co",
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhZ2F3dGdmcGZ1cG9id3VvdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMDIzNzYsImV4cCI6MjA4Nzg3ODM3Nn0.-ocXPElc-S6aPlqpJBr0-Fvhv8rvaxEDnWKbw5C4dD4"
 );
 
 /* FIREBASE */
 
-const firebaseConfig={
+const firebaseConfig = {
 apiKey:"AIzaSyDMPhlgEkaedtGWEiYF84JR_kDRJQZF68I",
 authDomain:"qwen-911.firebaseapp.com",
 databaseURL:"https://qwen-911-default-rtdb.firebaseio.com",
 projectId:"qwen-911"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getDatabase(app);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
 let username="";
 let chatMode="global";
+let replyData=null;
 
 const messages=document.getElementById("messages");
+const messageInput=document.getElementById("messageinput");
+
+/* AUTH */
 
 onAuthStateChanged(auth,user=>{
 
@@ -274,7 +277,8 @@ set(onlineRef,true);
 onDisconnect(onlineRef).remove();
 
 onValue(ref(db,"online"),snap=>{
-onlineCount.textContent=snap.exists()?Object.keys(snap.val()).length:0;
+document.getElementById("onlinecount").textContent =
+snap.exists()?Object.keys(snap.val()).length:0;
 });
 
 loadMessages();
@@ -283,18 +287,20 @@ loadMessages();
 
 /* SEND MESSAGE */
 
-sendBtn.onclick=()=>{
+document.getElementById("sendbtn").onclick=()=>{
 
 const text=messageInput.value.trim();
-if(!text)return;
+if(!text) return;
 
 push(ref(db,"messages/"+chatMode),{
 text,
 user:username,
-time:Date.now()
+time:Date.now(),
+reply:replyData
 });
 
 messageInput.value="";
+replyData=null;
 
 };
 
@@ -319,21 +325,27 @@ else if(msg.type==="video"){
 content=`<video src="${msg.url}" controls style="max-width:200px;border-radius:10px;"></video>`;
 }
 else{
-content=msg.text;
+content=msg.text || "";
+}
+
+let replyBlock="";
+
+if(msg.reply){
+replyBlock=`
+<div style="font-size:11px;opacity:.7;border-left:2px solid #00f5ff;padding-left:6px;margin-bottom:4px;">
+reply to ${msg.reply.user}: ${msg.reply.text}
+</div>`;
 }
 
 let actions="";
 
-if(msg.user===username){
-
 actions=`
 <div class="actions">
-<span onclick="editMessage('${key}','${msg.text || ""}')">edit</span>
-<span onclick="deleteMessage('${key}')">delete</span>
+<span onclick="replyMessage('${msg.user}','${msg.text || ''}')">reply</span>
+${msg.user===username?`<span onclick="editMessage('${key}','${msg.text || ""}')">edit</span>
+<span onclick="deleteMessage('${key}')">delete</span>`:""}
 </div>
 `;
-
-}
 
 div.innerHTML=`
 
@@ -343,6 +355,8 @@ div.innerHTML=`
 
 <div class="username">${msg.user}</div>
 
+${replyBlock}
+
 <div>${content}</div>
 
 <div class="time">${new Date(msg.time).toLocaleTimeString()}</div>
@@ -350,65 +364,73 @@ div.innerHTML=`
 ${actions}
 
 </div>
-
 `;
 
 messages.appendChild(div);
-
 messages.scrollTop=messages.scrollHeight;
 
 });
 
 }
 
-/* EDIT MESSAGE */
+/* REPLY */
+
+window.replyMessage=function(user,text){
+
+replyData={
+user:user,
+text:text
+};
+
+messageInput.focus();
+
+};
+
+/* EDIT */
 
 window.editMessage=function(key,text){
 
 const newText=prompt("Edit message:",text);
 
-if(newText===null)return;
+if(!newText) return;
 
 update(ref(db,"messages/"+chatMode+"/"+key),{
 text:newText,
 edited:true
 });
 
-}
+};
 
-/* DELETE MESSAGE */
+/* DELETE */
 
 window.deleteMessage=function(key){
 
-if(!confirm("Delete message?"))return;
+if(!confirm("Delete message?")) return;
 
 remove(ref(db,"messages/"+chatMode+"/"+key));
 
-}
+};
 
 /* IMAGE UPLOAD */
 
-imgBtn.onclick=()=>imgInput.click();
+document.getElementById("imgbtn").onclick=()=>document.getElementById("imginput").click();
 
-imgInput.onchange=async e=>{
+document.getElementById("imginput").onchange=async e=>{
 
 const file=e.target.files[0];
-if(!file)return;
+if(!file) return;
 
-const fileName="images/"+Date.now()+"_"+file.name;
+const filename="images/"+Date.now()+"_"+file.name;
 
 const { error } = await supabase.storage
 .from("QWEN-911(storage)")
-.upload(fileName,file);
+.upload(filename,file);
 
-if(error){
-console.log(error);
-return;
-}
+if(error){console.log(error);return;}
 
 const { data } = supabase.storage
 .from("QWEN-911(storage)")
-.getPublicUrl(fileName);
+.getPublicUrl(filename);
 
 push(ref(db,"messages/"+chatMode),{
 type:"image",
@@ -421,27 +443,24 @@ time:Date.now()
 
 /* VIDEO UPLOAD */
 
-videoBtn.onclick=()=>videoInput.click();
+document.getElementById("videobtn").onclick=()=>document.getElementById("videoinput").click();
 
-videoInput.onchange=async e=>{
+document.getElementById("videoinput").onchange=async e=>{
 
 const file=e.target.files[0];
-if(!file)return;
+if(!file) return;
 
-const fileName="videos/"+Date.now()+"_"+file.name;
+const filename="videos/"+Date.now()+"_"+file.name;
 
 const { error } = await supabase.storage
 .from("QWEN-911(storage)")
-.upload(fileName,file);
+.upload(filename,file);
 
-if(error){
-console.log(error);
-return;
-}
+if(error){console.log(error);return;}
 
 const { data } = supabase.storage
 .from("QWEN-911(storage)")
-.getPublicUrl(fileName);
+.getPublicUrl(filename);
 
 push(ref(db,"messages/"+chatMode),{
 type:"video",
@@ -452,7 +471,7 @@ time:Date.now()
 
 };
 
-</script>
+  </script>
 
 <script type="module" src="analytics.js"></script>
 
